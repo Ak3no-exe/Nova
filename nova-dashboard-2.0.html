@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b12">
+<title>NOVA — Espace de contrôle</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+:root{
+  --bg:#090b12;--panel:rgba(20,24,37,.72);--panel2:rgba(255,255,255,.045);
+  --line:rgba(255,255,255,.085);--text:#f4f6ff;--muted:#8991a8;
+  --accent:#9b8cff;--accent2:#63d9c5;--pink:#f38fc5;--yellow:#f5c978;
+  --shadow:0 18px 60px rgba(0,0,0,.28);--radius:22px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 10% -10%,rgba(105,91,210,.2),transparent 34%),radial-gradient(ellipse at 100% 20%,rgba(57,169,161,.11),transparent 30%),var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:25px 17px;border-right:1px solid var(--line);background:rgba(10,12,20,.68);backdrop-filter:blur(24px);display:flex;flex-direction:column;z-index:5}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 10px 30px}
+.logo{width:38px;height:38px;border-radius:13px;background:linear-gradient(140deg,#b2a6ff,#7162df 60%,#56d9c3);display:grid;place-items:center;color:#111322;font-weight:900;font-family:'Space Grotesk';box-shadow:0 7px 24px #8374ff55}
+.brand strong{font:700 19px 'Space Grotesk';letter-spacing:2px}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:2.2px;margin-top:2px}
+.nav-label{font-size:10px;letter-spacing:1.8px;color:#697189;padding:0 12px;margin:10px 0}
+.nav{display:grid;gap:6px}
+.nav button{border:1px solid transparent;background:transparent;color:#9ba3b8;text-align:left;padding:12px 13px;border-radius:13px;display:flex;align-items:center;gap:13px;transition:.2s;font-size:13px}
+.nav button:hover{background:var(--panel2);color:white}
+.nav button.active{color:white;background:linear-gradient(100deg,rgba(155,140,255,.2),rgba(155,140,255,.07));border-color:rgba(155,140,255,.2);box-shadow:inset 3px 0 var(--accent)}
+.nav .ico{width:19px;text-align:center;font-size:16px}
+.sidebar-bottom{margin-top:auto}
+.profile{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+.avatar{width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#f39acb,#8778ff);display:grid;place-items:center;font-weight:800;color:#171323}
+.profile b{font-size:12px}.profile small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.main{padding:30px clamp(18px,3vw,42px) 100px;max-width:1600px;width:100%;margin:auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:28px}
+.crumb{font-size:12px;color:var(--muted)}.crumb b{color:#e8eaff;font-weight:600}
+.top-actions{display:flex;align-items:center;gap:10px}
+.icon-btn,.ghost-btn{border:1px solid var(--line);background:var(--panel);color:#dce0f2;border-radius:13px;padding:10px 13px}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center}
+.coin-pill{border:1px solid rgba(245,201,120,.2);background:rgba(245,201,120,.08);color:#f7d99b;border-radius:13px;padding:10px 13px;font-size:12px;font-weight:700}
+.page{display:none;animation:fade .25s ease}.page.active{display:block}
+.no-motion *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:25px}
+.eyebrow{color:var(--accent2);font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:9px}
+h1{font:600 clamp(26px,3vw,36px) 'Space Grotesk';margin:0;letter-spacing:-1.2px}
+.sub{color:var(--muted);font-size:13px;margin:8px 0 0}
+.primary{border:0;background:linear-gradient(115deg,#a99aff,#8273ec);color:#10101b;border-radius:13px;padding:12px 17px;font-weight:800;font-size:12px;box-shadow:0 8px 25px #8d7bff33;transition:.2s}
+.primary:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.grid{display:grid;gap:15px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:17px}
+.card{background:linear-gradient(145deg,rgba(27,32,49,.82),rgba(17,20,31,.75));border:1px solid var(--line);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+.stat-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px}
+.stat-icon{width:33px;height:33px;border-radius:11px;background:rgba(155,140,255,.13);display:grid;place-items:center;font-size:15px}
+.stat-value{font:600 29px 'Space Grotesk';margin:15px 0 4px}.stat-foot{font-size:10px;color:var(--muted)}
+.stat-foot em{color:var(--accent2);font-style:normal}
+.content-grid{grid-template-columns:minmax(0,1.45fr) minmax(270px,.85fr)}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}
+.section-title h3{font:600 15px 'Space Grotesk';margin:0}.section-title span{color:var(--muted);font-size:11px}
+.task-list{display:grid;gap:9px}
+.task{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
+.task input{accent-color:var(--accent);width:16px;height:16px}.task-text{font-size:12px;flex:1}.task.done .task-text{text-decoration:line-through;color:#707990}
+.tag{font-size:9px;padding:5px 8px;border-radius:8px;background:rgba(99,217,197,.1);color:var(--accent2)}
+.tag.purple{background:rgba(155,140,255,.12);color:#b8adff}.tag.orange{background:rgba(245,201,120,.12);color:var(--yellow)}
+.progress{height:7px;border-radius:9px;background:#ffffff10;overflow:hidden;margin:12px 0 8px}.progress i{height:100%;display:block;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:9px}
+.quick-grid{grid-template-columns:repeat(2,1fr)}
+.quick{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel2);text-align:left;color:white;transition:.2s}
+.quick:hover{border-color:#9b8cff66;transform:translateY(-2px)}.quick span{font-size:20px}.quick b{display:block;font-size:12px;margin-top:10px}.quick small{color:var(--muted);font-size:10px}
+.activity{display:grid;gap:15px}.activity-row{display:flex;gap:11px;align-items:flex-start}.activity-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);margin-top:5px;box-shadow:0 0 12px #63d9c588}.activity-row p{font-size:11px;margin:0}.activity-row small{display:block;color:var(--muted);margin-top:4px;font-size:10px}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+.field{background:#0e1220;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:11px 13px;outline:none;font-size:12px;min-width:0}
+.field:focus{border-color:#9b8cff99;box-shadow:0 0 0 3px #9b8cff18}
+.toolbar .field{flex:1;min-width:160px}
+.item-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.note{min-height:155px;display:flex;flex-direction:column;gap:12px}.note h3{font:600 14px 'Space Grotesk';margin:0}.note p{font-size:11px;line-height:1.6;color:#aab1c5;margin:0;white-space:pre-wrap;flex:1}.note small{color:var(--muted);font-size:10px}
+.empty{padding:35px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:17px;font-size:12px}
+.calendar-grid{grid-template-columns:repeat(7,1fr);gap:7px}.day{min-height:82px;padding:9px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);font-size:11px}.day.muted{opacity:.35}.day.today{border-color:#9b8cff99;background:#9b8cff15}.day b{font-size:10px}.day small{display:block;color:var(--accent2);font-size:9px;margin-top:10px}
+.shop-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.product{position:relative;overflow:hidden}.product:after{content:"";position:absolute;width:110px;height:110px;right:-45px;top:-45px;border-radius:50%;background:#9b8cff20;filter:blur(4px)}
+.product-icon{width:43px;height:43px;border-radius:14px;background:rgba(155,140,255,.13);display:grid;place-items:center;font-size:20px;margin-bottom:17px}
+.product h3{font:600 14px 'Space Grotesk';margin:0 0 7px}.product p{font-size:11px;color:var(--muted);line-height:1.5;min-height:34px}
+.product-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.price{color:#f5d28d;font-weight:800;font-size:12px}
+.buy{border:1px solid #9b8cff55;background:#9b8cff18;color:#c9c1ff;padding:8px 11px;border-radius:10px;font-size:10px;font-weight:700}.buy:disabled{opacity:.45;cursor:default}
+.tool-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tool-box h3{font:600 14px 'Space Grotesk';margin:0 0 8px}.tool-box p{font-size:11px;color:var(--muted);line-height:1.5}
+.tool-display{font:600 28px 'Space Grotesk';padding:18px 0;text-align:center;color:#d8d2ff}
+.file-drop{border:1px dashed #7770ae66;border-radius:17px;padding:30px;text-align:center;background:#9b8cff08}.file-drop input{max-width:100%;margin-top:15px;color:var(--muted);font-size:11px}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid var(--line);font-size:12px}.settings-row:last-child{border:0}
+.switch{accent-color:var(--accent);width:17px;height:17px}
+
+.inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.nova-extra-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.nova-bar{height:10px;border-radius:10px;background:#ffffff12;overflow:hidden}.nova-bar i{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent2))}.nova-stat{font:600 25px 'Space Grotesk';margin:8px 0}.nova-chip{display:inline-flex;padding:6px 9px;border-radius:9px;background:var(--panel2);font-size:10px;color:var(--muted)}.nova-actions{display:flex;gap:8px;flex-wrap:wrap}.nova-actions .field{flex:1}.nova-list{display:grid;gap:9px}.nova-row{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);font-size:12px}.nova-row .grow{flex:1;min-width:0}.nova-row small{display:block;color:var(--muted);margin-top:3px}.swatches{display:flex;gap:10px;flex-wrap:wrap}.swatch{width:35px;height:35px;border-radius:12px;border:2px solid #ffffff55}.swatch.selected{outline:2px solid white;outline-offset:3px}
+@media(max-width:800px){.nova-extra-grid{grid-template-columns:1fr}}
+.feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.feature-card h3{font:600 14px 'Space Grotesk';margin:0 0 8px}.feature-card p{font-size:11px;color:var(--muted);line-height:1.5}.feature-list{display:grid;gap:9px;margin-top:14px}.feature-row input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;flex:0 0 auto}.feature-row .ghost-btn{font-size:10px}.feature-row{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);font-size:12px}.feature-row span{flex:1}.feature-row small{color:var(--muted)}.feature-row button{padding:6px 9px}
+@media(max-width:760px){.mobile-nav{overflow-x:auto;justify-content:flex-start}.mobile-nav button{min-width:62px;flex:0 0 auto}.feature-grid{grid-template-columns:1fr}}
+.inventory-item{display:flex;flex-direction:column;gap:10px}
+.inventory-item .product-icon{margin:0}
+.inventory-item .equip{margin-top:auto}
+.auth-screen{position:fixed;inset:0;z-index:100;background:radial-gradient(ellipse at 15% 0%,#6254ad55,transparent 40%),#090b12;display:grid;place-items:center;padding:18px}
+.auth-card{width:min(430px,100%);padding:28px;background:#171b2a;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
+.auth-card h1{font-size:28px;margin-bottom:8px}.auth-card p{color:var(--muted);font-size:12px;line-height:1.6}
+.auth-card .field{width:100%;margin:7px 0}.auth-actions{display:grid;gap:9px;margin-top:12px}
+.auth-switch{border:0;background:transparent;color:#b8adff;padding:10px}
+.admin-panel{border:1px solid #f5c97855;background:#f5c9780b}
+@media(max-width:760px){.inventory-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:390px){.inventory-grid{grid-template-columns:1fr}}
+.mobile-nav{display:none}
+.toast{position:fixed;right:22px;bottom:22px;padding:13px 17px;border:1px solid #9b8cff55;background:#17182aee;backdrop-filter:blur(20px);border-radius:13px;color:#eeeaff;font-size:12px;box-shadow:var(--shadow);z-index:20;animation:fade .2s}
+.modal-back{position:fixed;inset:0;background:#05060bd9;backdrop-filter:blur(8px);display:none;place-items:center;z-index:30;padding:18px}.modal-back.show{display:grid}
+.modal{width:min(440px,100%);background:#171b2a;border:1px solid var(--line);border-radius:22px;padding:23px;box-shadow:var(--shadow)}.modal h2{font:600 20px 'Space Grotesk';margin:0 0 17px}.modal .field{width:100%;margin-bottom:10px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+
+body.light{--bg:#f3f5fb;--panel:rgba(255,255,255,.88);--panel2:rgba(20,30,55,.045);--line:rgba(30,42,70,.12);--text:#20263a;--muted:#69738b;--accent:#7565df;--accent2:#159b87;--yellow:#b98220;--shadow:0 18px 45px rgba(35,45,80,.09);background:radial-gradient(ellipse at 10% -10%,rgba(130,115,230,.13),transparent 34%),var(--bg);color:var(--text)}
+body.light .sidebar{background:rgba(255,255,255,.82)}
+body.light .nav button{color:#59627a}
+body.light .nav button.active{color:#40358d;background:rgba(117,101,223,.12)}
+body.light .crumb b,body.light .quick{color:#20263a}
+body.light .card{background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(248,249,253,.94))}
+body.light .field{background:#fff;color:#20263a;border-color:rgba(30,42,70,.16)}
+body.light .task{background:rgba(30,42,70,.025)}
+body.light .day{background:rgba(255,255,255,.75)}
+body.light .mobile-nav{background:rgba(255,255,255,.94);border-color:rgba(30,42,70,.13)}
+body.light .mobile-nav button{color:#69738b}
+body.light .mobile-nav button.active{background:#7565df18;color:#5143ad}
+body.light .ghost-btn,body.light .icon-btn{background:#fff;color:#424b64;border-color:rgba(30,42,70,.14)}
+body.light .modal{background:#fff;color:#20263a}
+body.light .product p,body.light .note p{color:#626d84}
+body.light .quick{background:rgba(30,42,70,.035)}
+body.light .toast{background:#fff;color:#20263a;border-color:#c9c2ff}
+body.light .file-drop{background:#7565df0a}
+
+
+.nav-group{margin:0 0 9px}.nav-group summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 12px;color:#c4c9da;font-size:11px;font-weight:700;border-radius:11px;user-select:none}.nav-group summary::-webkit-details-marker{display:none}.nav-group summary:after{content:'⌄';margin-left:auto;color:var(--muted);transition:.2s}.nav-group:not([open]) summary:after{transform:rotate(-90deg)}.nav-group summary:hover{background:var(--panel2)}.nav-group summary span{font-size:15px;color:var(--accent2)}.nav-group .nav{padding:3px 0 5px 8px}.nav-group .nav button{padding:10px 11px;font-size:12px}.mobile-menu-panel{display:none}
+.project-card{min-height:190px;display:flex;flex-direction:column;gap:12px}.project-card .progress{margin:4px 0}.project-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.project-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}.project-actions button{font-size:10px}
+
+@media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.item-grid,.shop-grid,.tool-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+ .app{display:block}.sidebar{display:none}.main{padding:21px 15px 100px}.topbar{margin-bottom:22px}.page-head{align-items:flex-start}.page-head .primary{padding:10px 12px}.content-grid{grid-template-columns:1fr}.stats{gap:10px}.card{padding:15px;border-radius:18px}.stat-value{font-size:25px}.item-grid,.shop-grid,.tool-grid{grid-template-columns:1fr 1fr}
+ .mobile-menu-panel{display:none;position:fixed;left:10px;right:10px;bottom:82px;z-index:16;padding:15px;border:1px solid var(--line);border-radius:20px;background:rgba(17,20,32,.96);backdrop-filter:blur(24px);box-shadow:0 15px 50px #000b;max-height:65vh;overflow:auto}.mobile-menu-panel.open{display:block}.mobile-menu-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.mobile-menu-section{margin-top:13px}.mobile-menu-section>small{display:block;color:var(--accent2);font-size:9px;letter-spacing:1.5px;margin-bottom:8px}.mobile-menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.mobile-menu-grid button{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px;border-radius:11px;text-align:left;font-size:11px}.mobile-nav{position:fixed;display:flex;left:10px;right:10px;bottom:10px;z-index:17;padding:8px;gap:3px;justify-content:space-around;border:1px solid #ffffff18;border-radius:20px;background:rgba(17,20,32,.88);backdrop-filter:blur(24px);box-shadow:0 10px 45px #0009}
+ .mobile-nav button{border:0;background:transparent;color:#858da4;display:grid;gap:4px;justify-items:center;flex:1;padding:7px 2px;font-size:9px;border-radius:12px}.mobile-nav button span{font-size:17px}.mobile-nav button.active{background:#9b8cff20;color:#d7d0ff}
+ .calendar-grid{gap:4px}.day{min-height:66px;padding:6px}.day small{font-size:8px}.top-actions .ghost-btn{display:none}
+}
+@media(max-width:390px){.stats{grid-template-columns:1fr 1fr}.item-grid,.shop-grid,.tool-grid{grid-template-columns:1fr}.coin-pill{font-size:10px;padding:9px}.crumb{font-size:10px}}
+</style>
+</head>
+<body>
+<div class="app" id="appShell" style="display:none">
+<aside class="sidebar">
+  <div class="brand"><div class="logo">N</div><div><strong>NOVA</strong><small>CONTROL CENTER</small></div></div>
+  <div class="nav-label">ESPACE NOVA</div>
+  <details class="nav-group" open><summary><span>◈</span> Vue générale</summary><nav class="nav" id="sideNav">
+    <button class="active" data-page="home"><span class="ico">⌂</span>Accueil</button>
+    <button data-page="analytics"><span class="ico">⌁</span>Statistiques</button>
+  </nav></details>
+  <details class="nav-group" open><summary><span>▤</span> Organisation</summary><nav class="nav">
+    <button data-page="tasks"><span class="ico">✓</span>Tâches</button>
+    <button data-page="projects"><span class="ico">▦</span>Projets</button>
+    <button data-page="notes"><span class="ico">✎</span>Notes & idées</button>
+    <button data-page="calendar"><span class="ico">▣</span>Calendrier</button>
+    <button data-page="files"><span class="ico">▱</span>Fichiers</button>
+  </nav></details>
+  <details class="nav-group" open><summary><span>✦</span> Découvrir</summary><nav class="nav">
+    <button data-page="tools"><span class="ico">⌘</span>Boîte à outils</button>
+    <button data-page="shop"><span class="ico">✧</span>Boutique</button>
+    <button data-page="inventory"><span class="ico">▣</span>Inventaire</button>
+  </nav></details>
+  <details class="nav-group"><summary><span>⚙</span> Compte</summary><nav class="nav" id="accountNav">
+    <button data-page="settings"><span class="ico">⚙</span>Paramètres</button>
+  </nav></details>
+  <details class="nav-group" open><summary><span>✧</span> NOVA 2.0</summary><nav class="nav">
+    <button data-page="smart"><span class="ico">◈</span>Vue intelligente</button>
+    <button data-page="agendaPlus"><span class="ico">▦</span>Agenda+</button>
+    <button data-page="budget"><span class="ico">€</span>Budget</button>
+    <button data-page="customize"><span class="ico">◉</span>Personnalisation</button>
+    <button data-page="notifications"><span class="ico">♧</span>Notifications</button>
+    <button data-page="profile"><span class="ico">☺</span>Mon profil</button>
+  </nav></details>
+  <details class="nav-group" id="premiumGroup" style="display:none"><summary><span>✧</span> Mes extensions</summary><nav class="nav" id="premiumNav"></nav></details>
+  <details class="nav-group" id="adminGroup" style="display:none"><summary><span>♛</span> Administration</summary><nav class="nav" id="adminNav"></nav></details>
+  <div class="sidebar-bottom"><div class="profile"><div class="avatar">N</div><div><b>Mon espace</b><small>Compte personnel</small></div></div></div>
+</aside>
+<main class="main">
+  <header class="topbar"><div class="crumb">NOVA / <b id="crumb">Vue générale</b></div><div class="top-actions"><div class="coin-pill">✦ <span id="coinTop">250</span> COINS</div><button class="icon-btn" id="themeBtn" title="Changer le thème">☼</button><button class="ghost-btn" onclick="showToast('Tout est à jour ✨')">◉&nbsp; Tout est à jour</button><button class="ghost-btn" onclick="logout()">Déconnexion</button></div></header>
+
+  <section class="page active" id="home">
+    <div class="page-head"><div><div class="eyebrow">TON ESPACE, TES RÈGLES</div><h1>Bon retour 👋</h1><p class="sub">Voici ce qui se passe dans ton univers aujourd'hui.</p></div><button class="primary" onclick="openModal('task')">＋ Nouvelle tâche</button></div>
+    <div class="grid stats">
+      <div class="card"><div class="stat-top">Tâches terminées <span class="stat-icon">✓</span></div><div class="stat-value" id="statDone">0</div><div class="stat-foot"><em>Progression</em> de ton espace</div></div>
+      <div class="card"><div class="stat-top">À faire <span class="stat-icon">◷</span></div><div class="stat-value" id="statTodo">0</div><div class="stat-foot">Tâches en attente</div></div>
+      <div class="card"><div class="stat-top">Notes créées <span class="stat-icon">▤</span></div><div class="stat-value" id="statNotes">0</div><div class="stat-foot">Tes idées au même endroit</div></div>
+      <div class="card"><div class="stat-top">Niveau NOVA <span class="stat-icon">✧</span></div><div class="stat-value" id="statLevel">01</div><div class="stat-foot">Continue à organiser ton espace</div></div>
+    </div>
+    <div class="grid content-grid">
+      <div class="grid">
+        <div class="card"><div class="section-title"><h3>Ta progression</h3><span id="progressLabel">0% complété</span></div><div class="progress"><i id="progressBar" style="width:0%"></i></div><div class="stat-foot">Chaque tâche terminée te rapproche de tes objectifs.</div></div>
+        <div class="card"><div class="section-title"><h3>À faire aujourd'hui</h3><button class="ghost-btn" onclick="navigate('tasks')">Tout voir →</button></div><div class="task-list" id="homeTasks"></div></div>
+      </div>
+      <div class="grid">
+        <div class="card"><div class="section-title"><h3>Accès rapide</h3><span>Raccourcis</span></div><div class="grid quick-grid">
+          <button class="quick" onclick="openModal('task')"><span>＋</span><b>Ajouter une tâche</b><small>Organise ta journée</small></button>
+          <button class="quick" onclick="openModal('note')"><span>✎</span><b>Écrire une note</b><small>Capture une idée</small></button>
+          <button class="quick" onclick="navigate('calendar')"><span>▦</span><b>Calendrier</b><small>Voir tes événements</small></button>
+          <button class="quick" onclick="navigate('shop')"><span>✧</span><b>Boutique</b><small>Débloquer des extras</small></button><button class="quick" onclick="navigate('challenges')"><span>🏁</span><b>Défis</b><small>Gagner des coins bonus</small></button><button class="quick" onclick="navigate('trophies')"><span>🏆</span><b>Trophées</b><small>Voir tes réussites</small></button>
+        </div></div>
+        <div class="card"><div class="section-title"><h3>Activité récente</h3><span>En direct</span></div><div class="activity" id="activity"><div class="activity-row"><div class="activity-dot"></div><p>Bienvenue sur NOVA.<small>Ton espace est prêt à être personnalisé.</small></p></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page" id="tasks">
+    <div class="page-head"><div><div class="eyebrow">ORGANISATION</div><h1>Mes tâches</h1><p class="sub">Garde le contrôle sur ce que tu as à faire.</p></div><button class="primary" onclick="openModal('task')">＋ Ajouter</button></div>
+    <div class="toolbar"><input class="field" id="taskSearch" placeholder="Rechercher une tâche…"><select class="field" id="taskFilter"><option value="all">Toutes les tâches</option><option value="todo">À faire</option><option value="done">Terminées</option></select></div>
+    <div class="card"><div class="task-list" id="allTasks"></div></div>
+  </section>
+
+  <section class="page" id="projects">
+    <div class="page-head"><div><div class="eyebrow">ESPACE PROJETS</div><h1>Mes projets 🚀</h1><p class="sub">Rassemble tes idées, tes étapes et ton avancement au même endroit.</p></div></div>
+    <div class="card" style="margin-bottom:16px"><div class="toolbar"><input class="field" id="projectInput" maxlength="70" placeholder="Nom du nouveau projet…"><button class="primary" onclick="addProject()">＋ Créer un projet</button></div><p class="sub">Astuce : transforme un gros objectif en petit projet, puis fais progresser sa barre au fil du temps.</p></div>
+    <div class="grid feature-grid" id="projectList"></div>
+  </section>
+
+  <section class="page" id="notes">
+    <div class="page-head"><div><div class="eyebrow">TES IDÉES</div><h1>Notes & idées</h1><p class="sub">Un endroit simple pour ne rien oublier.</p></div><button class="primary" onclick="openModal('note')">＋ Nouvelle note</button></div>
+    <div class="toolbar"><input class="field" id="noteSearch" placeholder="Rechercher dans tes notes…"></div><div class="grid item-grid" id="notesGrid"></div>
+  </section>
+
+  <section class="page" id="calendar">
+    <div class="page-head"><div><div class="eyebrow">PLANIFICATION</div><h1>Calendrier</h1><p class="sub">Visualise tes dates importantes.</p></div><button class="primary" onclick="openModal('event')">＋ Événement</button></div>
+    <div class="card"><div class="section-title"><button class="ghost-btn" onclick="changeMonth(-1)">←</button><h3 id="monthTitle">Mois</h3><button class="ghost-btn" onclick="changeMonth(1)">→</button></div><div class="grid calendar-grid" id="calendarGrid"></div></div>
+    <div class="card" style="margin-top:15px"><div class="section-title"><h3>Événements à venir</h3><span>Ton planning</span></div><div class="task-list" id="eventList"></div></div>
+  </section>
+
+  <section class="page" id="files">
+    <div class="page-head"><div><div class="eyebrow">CENTRE DE STOCKAGE</div><h1>Mes fichiers</h1><p class="sub">Prévisualise et sélectionne des fichiers depuis ton appareil.</p></div></div>
+    <div class="card"><div class="file-drop"><div style="font-size:28px">▱</div><b style="display:block;margin-top:10px;font-size:13px">Sélectionner des fichiers</b><p class="sub">Les fichiers restent sur ton appareil : cette page ne les envoie sur aucun serveur.</p><input type="file" id="fileInput" multiple></div><div class="task-list" id="fileList" style="margin-top:16px"></div></div>
+  </section>
+
+  <section class="page" id="analytics">
+    <div class="page-head"><div><div class="eyebrow">APERÇU PERSONNEL</div><h1>Statistiques</h1><p class="sub">Comprends ta progression en un coup d'œil.</p></div></div>
+    <div class="grid stats">
+      <div class="card"><div class="stat-top">Taux de réussite <span class="stat-icon">↗</span></div><div class="stat-value" id="anaRate">0%</div><div class="stat-foot">Tâches terminées / total</div></div>
+      <div class="card"><div class="stat-top">Total des tâches <span class="stat-icon">☷</span></div><div class="stat-value" id="anaTotal">0</div><div class="stat-foot">Depuis la création de ton espace</div></div>
+      <div class="card"><div class="stat-top">Notes <span class="stat-icon">▤</span></div><div class="stat-value" id="anaNotes">0</div><div class="stat-foot">Idées sauvegardées</div></div>
+      <div class="card"><div class="stat-top">Événements <span class="stat-icon">▦</span></div><div class="stat-value" id="anaEvents">0</div><div class="stat-foot">Dans ton calendrier</div></div>
+    </div>
+    <div class="card"><div class="section-title"><h3>Répartition des tâches</h3><span>Vue globale</span></div><div style="display:flex;gap:8px;height:15px;border-radius:10px;overflow:hidden;background:#ffffff0d"><div id="doneSegment" style="background:linear-gradient(90deg,#9b8cff,#63d9c5);width:0%"></div><div id="todoSegment" style="background:#f5c978;width:100%"></div></div><div style="display:flex;gap:20px;margin-top:15px;font-size:11px;color:var(--muted)"><span>🟣 Terminées</span><span>🟡 En attente</span></div></div>
+  </section>
+
+  <section class="page" id="tools">
+    <div class="page-head"><div><div class="eyebrow">UTILITAIRES</div><h1>Boîte à outils</h1><p class="sub">Quelques outils pratiques, directement dans ton dashboard.</p></div></div>
+    <div class="grid tool-grid">
+      <div class="card tool-box"><h3>Calculatrice</h3><p>Effectue un calcul rapidement.</p><input class="field" id="calcInput" placeholder="Ex. 25 * (8 + 2)" style="width:100%"><div class="tool-display" id="calcResult">—</div><button class="primary" style="width:100%" onclick="calculate()">Calculer</button></div>
+      <div class="card tool-box"><h3>Chronomètre</h3><p>Un petit chrono pour rester concentré.</p><div class="tool-display" id="timerDisplay">00:00</div><div style="display:flex;gap:7px"><button class="primary" style="flex:1" id="timerStart">Démarrer</button><button class="ghost-btn" id="timerReset">Reset</button></div></div>
+      <div class="card tool-box"><h3>Bloc-notes rapide</h3><p>Un texte temporaire enregistré automatiquement.</p><textarea class="field" id="quickMemo" rows="5" style="width:100%;resize:vertical" placeholder="Écris quelque chose…"></textarea><small style="color:var(--muted)">Sauvegarde automatique sur cet appareil.</small></div>
+    </div>
+  </section>
+
+  <section class="page" id="shop">
+    <div class="page-head"><div><div class="eyebrow">NOVA STORE</div><h1>La boutique</h1><p class="sub">Utilise tes coins pour débloquer des options dans ton espace.</p></div><div class="coin-pill">✦ <span id="coinShop">250</span> COINS</div></div>
+    <div class="card" style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:15px"><div><b style="font:600 15px 'Space Grotesk'">Ton portefeuille</b><p class="sub" style="margin-bottom:0">Les coins sont une monnaie virtuelle locale à cette page.</p></div><div style="font:600 26px 'Space Grotesk';color:#f5d28d">✦ <span id="walletBalance">250</span></div></div>
+    <div class="card" style="margin-bottom:16px"><b>Récompense quotidienne</b><p class="sub">Récupère 30 coins une fois par jour pour faire progresser ton portefeuille.</p><button class="primary" id="dailyRewardBtn" onclick="claimDailyReward()">＋ Récupérer 30 coins</button></div>
+    <div class="grid shop-grid" id="shopGrid"></div>
+  </section>
+
+  <section class="page" id="goals">
+    <div class="page-head"><div><div class="eyebrow">NOVA PREMIUM</div><h1>Mes objectifs 🎯</h1><p class="sub">Transforme tes projets en étapes concrètes.</p></div></div>
+    <div class="card"><div class="toolbar"><input class="field" id="goalInput" placeholder="Ex. Finir mon projet" maxlength="70"><button class="primary" onclick="addGoal()">＋ Ajouter un objectif</button></div><div id="goalList" class="feature-list"></div></div>
+  </section>
+  <section class="page" id="habits">
+    <div class="page-head"><div><div class="eyebrow">NOVA PREMIUM</div><h1>Mes habitudes 🔁</h1><p class="sub">Coche tes habitudes chaque jour et garde le rythme.</p></div></div>
+    <div class="card"><div class="toolbar"><input class="field" id="habitInput" placeholder="Ex. Lire 15 minutes" maxlength="60"><button class="primary" onclick="addHabit()">＋ Ajouter</button></div><div id="habitList" class="feature-list"></div></div>
+  </section>
+  <section class="page" id="journal">
+    <div class="page-head"><div><div class="eyebrow">NOVA PREMIUM</div><h1>Journal personnel 📓</h1><p class="sub">Garde une trace de tes idées et de tes journées.</p></div></div>
+    <div class="card"><b id="journalDate"></b><textarea class="field" id="journalInput" rows="8" style="width:100%;margin-top:14px;resize:vertical" placeholder="Écris ce que tu veux garder en mémoire..."></textarea><button class="primary" onclick="saveJournalEntry()">Enregistrer cette page</button></div><div class="card" style="margin-top:15px"><b>Entrées précédentes</b><div id="journalHistory" class="feature-list"></div></div>
+  </section>
+  <section class="page" id="focusroom">
+    <div class="page-head"><div><div class="eyebrow">NOVA PREMIUM</div><h1>Salle Focus ⚡</h1><p class="sub">Une session de concentration avec pauses intégrées.</p></div></div>
+    <div class="card" style="max-width:650px;margin:auto;text-align:center"><div class="eyebrow">SESSION EN COURS</div><div class="tool-display" id="focusDisplay" style="font-size:clamp(48px,10vw,76px)">25:00</div><p class="sub" id="focusStatus">Prêt pour une session de travail.</p><div class="toolbar" style="justify-content:center"><button class="primary" id="focusStart" onclick="toggleFocus()">Démarrer</button><button class="ghost-btn" onclick="resetFocus()">Réinitialiser</button><button class="ghost-btn" onclick="setFocusMode('work')">25 min</button><button class="ghost-btn" onclick="setFocusMode('break')">5 min</button></div></div>
+  </section>
+  <section class="page" id="challenges">
+    <div class="page-head"><div><div class="eyebrow">NOVA DAILY QUESTS</div><h1>Défis du jour 🏁</h1><p class="sub">Trois petites missions pour faire avancer ton espace et gagner des coins bonus.</p></div><div class="coin-pill">✦ <span id="challengeDate"></span></div></div>
+    <div class="grid stats"><div class="card"><div class="stat-top">Missions validées</div><div class="stat-value" id="challengeDone">0/3</div><div class="stat-foot">Aujourd’hui</div></div><div class="card"><div class="stat-top">Coins à gagner</div><div class="stat-value" id="challengeEarn">60</div><div class="stat-foot">20 coins par mission</div></div></div>
+    <div class="grid feature-grid" id="challengeList"></div>
+  </section>
+  <section class="page" id="wishlist">
+    <div class="page-head"><div><div class="eyebrow">TES ENVIES & PROJETS</div><h1>Wishlist 💎</h1><p class="sub">Note les choses que tu aimerais acheter, apprendre ou réaliser.</p></div></div>
+    <div class="card"><div class="toolbar"><input class="field" id="wishInput" maxlength="80" placeholder="Ex. Apprendre à coder un mini-jeu"><select class="field" id="wishCategory"><option>Projet</option><option>À apprendre</option><option>À acheter</option><option>Sortie</option><option>Autre</option></select><button class="primary" onclick="addWish()">＋ Ajouter</button></div><div class="feature-list" id="wishList"></div></div>
+  </section>
+  <section class="page" id="routines">
+    <div class="page-head"><div><div class="eyebrow">TON RYTHME</div><h1>Mes routines 🌅</h1><p class="sub">Prépare des étapes simples pour le matin et le soir. Tu peux les modifier à tout moment.</p></div></div>
+    <div class="grid feature-grid"><div class="card"><div class="section-title"><h3>☀️ Routine du matin</h3><span id="morningCount">0/0</span></div><div id="morningRoutine" class="feature-list"></div><div class="toolbar" style="margin-top:12px"><input class="field" id="morningInput" placeholder="Ajouter une étape"><button class="buy" onclick="addRoutine('morning')">＋</button></div></div><div class="card"><div class="section-title"><h3>🌙 Routine du soir</h3><span id="eveningCount">0/0</span></div><div id="eveningRoutine" class="feature-list"></div><div class="toolbar" style="margin-top:12px"><input class="field" id="eveningInput" placeholder="Ajouter une étape"><button class="buy" onclick="addRoutine('evening')">＋</button></div></div></div>
+    <p class="sub" style="margin-top:12px">Les coches sont remises à zéro chaque jour. Tes étapes restent enregistrées.</p>
+  </section>
+  <section class="page" id="trophies">
+    <div class="page-head"><div><div class="eyebrow">TES ACCOMPLISSEMENTS</div><h1>Galerie des trophées 🏆</h1><p class="sub">Des badges se débloquent automatiquement à mesure que tu utilises NOVA.</p></div></div>
+    <div class="grid stats"><div class="card"><div class="stat-top">Badges débloqués</div><div class="stat-value" id="trophyCount">0</div><div class="stat-foot">Sur l’ensemble de la collection</div></div><div class="card"><div class="stat-top">Prochaine étape</div><div class="stat-value" id="nextTrophy">—</div><div class="stat-foot">Continue à explorer NOVA</div></div></div>
+    <div class="grid feature-grid" id="trophyGrid"></div>
+  </section>
+  <section class="page" id="inventory">
+    <div class="page-head"><div><div class="eyebrow">TES OBJETS</div><h1>Inventaire</h1><p class="sub">Retrouve tes achats et équipe tes options.</p></div></div>
+    <div class="card" style="margin-bottom:16px"><b>Équipement actuel</b><p class="sub" id="equippedLabel">Aucun objet équipé.</p></div>
+    <div class="grid inventory-grid" id="inventoryGrid"></div>
+  </section>
+  <section class="page" id="admin">
+    <div class="page-head"><div><div class="eyebrow">ESPACE PRIVILÉGIÉ</div><h1>Administration</h1><p class="sub">Gestion locale des comptes et des coins.</p></div></div>
+    <div class="card admin-panel"><b>Outils administrateur</b><p class="sub">Ces commandes agissent sur les comptes enregistrés sur cet appareil uniquement.</p>
+      <div class="toolbar"><select class="field" id="adminUser"></select><input class="field" id="adminCoins" type="number" min="1" placeholder="Nombre de coins"><button class="primary" onclick="adminGrantCoins()">Ajouter des coins</button></div>
+      <div id="adminUsers" class="task-list"></div>
+    </div>
+  </section>
+  <section class="page" id="smart">
+    <div class="page-head"><div><div class="eyebrow">NOVA INTELLIGENCE</div><h1>Vue intelligente ◈</h1><p class="sub">Un résumé clair de ton activité et de tes priorités.</p></div><button class="primary" onclick="navigate('analytics')">Statistiques complètes</button></div>
+    <div class="grid stats"><div class="card"><div class="stat-top">Tâches terminées</div><div class="stat-value" id="smartDone">0</div><div class="stat-foot">Sur l'ensemble</div></div><div class="card"><div class="stat-top">Tâches restantes</div><div class="stat-value" id="smartTodo">0</div><div class="stat-foot">À terminer</div></div><div class="card"><div class="stat-top">Événements à venir</div><div class="stat-value" id="smartEvents">0</div><div class="stat-foot">Dans les 7 prochains jours</div></div><div class="card"><div class="stat-top">Projets actifs</div><div class="stat-value" id="smartProjects">0</div><div class="stat-foot">À faire avancer</div></div></div>
+    <div class="grid nova-extra-grid"><div class="card"><div class="section-title"><h3>Progression globale</h3><span id="smartPercent">0%</span></div><div class="nova-bar"><i id="smartBar" style="width:0%"></i></div><p class="sub" id="smartAdvice">Ajoute une tâche pour commencer.</p></div><div class="card"><div class="section-title"><h3>Priorité suggérée</h3><span class="nova-chip">Suggestion</span></div><div id="smartPriority" class="nova-list"></div></div><div class="card"><div class="section-title"><h3>Activité de la semaine</h3><span>7 jours</span></div><div id="smartWeek" class="nova-list"></div></div><div class="card"><div class="section-title"><h3>Accès rapides</h3></div><div class="grid quick-grid"><button class="quick" onclick="openModal('task')"><span>＋</span><b>Nouvelle tâche</b></button><button class="quick" onclick="openModal('event')"><span>▦</span><b>Nouvel événement</b></button><button class="quick" onclick="navigate('budget')"><span>€</span><b>Mon budget</b></button><button class="quick" onclick="navigate('notifications')"><span>♧</span><b>Notifications</b></button></div></div></div>
+  </section>
+  <section class="page" id="agendaPlus">
+    <div class="page-head"><div><div class="eyebrow">PLANIFICATION PLUS</div><h1>Agenda+ ▦</h1><p class="sub">Retrouve tes événements et tes tâches dans une seule vue.</p></div><button class="primary" onclick="openModal('event')">＋ Événement</button></div>
+    <div class="toolbar"><input class="field" type="date" id="agendaFrom"><select class="field" id="agendaFilter"><option value="all">Tout afficher</option><option value="events">Événements</option><option value="tasks">Tâches</option></select><button class="ghost-btn" onclick="renderAgendaPlus()">Actualiser</button></div><div class="card"><div class="section-title"><h3>Planning chronologique</h3><span id="agendaCount">0 élément</span></div><div id="agendaList" class="nova-list"></div></div>
+  </section>
+  <section class="page" id="budget">
+    <div class="page-head"><div><div class="eyebrow">GESTION PERSONNELLE</div><h1>Mon budget €</h1><p class="sub">Suis tes entrées, tes dépenses et ton solde.</p></div></div>
+    <div class="grid stats"><div class="card"><div class="stat-top">Solde actuel</div><div class="stat-value" id="budgetBalance">0 €</div><div class="stat-foot">Entrées moins dépenses</div></div><div class="card"><div class="stat-top">Entrées</div><div class="stat-value" id="budgetIncome">0 €</div><div class="stat-foot">Total enregistré</div></div><div class="card"><div class="stat-top">Dépenses</div><div class="stat-value" id="budgetExpense">0 €</div><div class="stat-foot">Total enregistré</div></div><div class="card"><div class="stat-top">Opérations</div><div class="stat-value" id="budgetCount">0</div><div class="stat-foot">Historique</div></div></div>
+    <div class="card" style="margin-bottom:15px"><div class="section-title"><h3>Ajouter une opération</h3><span>Suivi manuel</span></div><div class="toolbar"><input class="field" id="budgetLabel" placeholder="Ex. Argent de poche, sortie…"><input class="field" id="budgetAmount" type="number" min="0.01" step="0.01" placeholder="Montant (€)"><select class="field" id="budgetType"><option value="income">Entrée</option><option value="expense">Dépense</option></select><button class="primary" onclick="addBudgetEntry()">＋ Ajouter</button></div></div>
+    <div class="card"><div class="section-title"><h3>Historique</h3><button class="ghost-btn" onclick="clearBudget()">Effacer l'historique</button></div><div id="budgetList" class="nova-list"></div></div>
+  </section>
+  <section class="page" id="customize">
+    <div class="page-head"><div><div class="eyebrow">TON INTERFACE</div><h1>Personnalisation ◉</h1><p class="sub">Ajuste l'apparence de NOVA à ton goût.</p></div></div>
+    <div class="grid nova-extra-grid"><div class="card"><h3>Couleur principale</h3><p class="sub">Choisis l'accent utilisé dans les boutons et les éléments actifs.</p><div class="swatches" id="accentSwatches"></div></div><div class="card"><h3>Ambiance</h3><p class="sub">Choisis une apparence générale.</p><div class="nova-actions"><button class="ghost-btn" onclick="setTheme(true)">☾ Sombre</button><button class="ghost-btn" onclick="setTheme(false)">☼ Clair</button></div></div><div class="card"><h3>Disposition</h3><p class="sub">Réglages d'affichage.</p><div class="settings-row"><div><b>Effet verre</b><div class="sub">Transparence des cartes</div></div><input type="checkbox" id="customGlass" class="switch" checked onchange="setGlass(this.checked)"></div><div class="settings-row"><div><b>Animations</b><div class="sub">Transitions douces</div></div><input type="checkbox" id="motionToggle" class="switch" checked onchange="setMotion(this.checked)"></div></div><div class="card"><h3>Aperçu</h3><div class="card" style="margin-top:14px"><div class="eyebrow">NOVA CONTROL CENTER</div><h2>Ton espace, tes règles.</h2><p class="sub">Les changements sont enregistrés sur ton compte.</p><button class="primary">Bouton d'aperçu</button></div><button class="ghost-btn" style="margin-top:12px" onclick="resetAppearance()">Réinitialiser l'apparence</button></div></div>
+  </section>
+  <section class="page" id="notifications">
+    <div class="page-head"><div><div class="eyebrow">CENTRE D'ALERTES</div><h1>Notifications ♧</h1><p class="sub">Tes rappels et messages importants au même endroit.</p></div><button class="ghost-btn" onclick="markAllNotificationsRead()">Tout marquer comme lu</button></div>
+    <div class="card" style="margin-bottom:15px"><div class="toolbar"><input class="field" id="notificationInput" placeholder="Écrire un rappel…"><button class="primary" onclick="addNotification()">＋ Créer un rappel</button></div></div><div class="card"><div class="section-title"><h3>Boîte de réception</h3><span id="notificationUnread">0 non lue</span></div><div id="notificationList" class="nova-list"></div></div>
+  </section>
+  <section class="page" id="profile">
+    <div class="page-head"><div><div class="eyebrow">ESPACE PERSONNEL</div><h1>Mon profil ☺</h1><p class="sub">Personnalise les informations visibles dans ton espace.</p></div></div>
+    <div class="grid nova-extra-grid"><div class="card"><div style="display:flex;align-items:center;gap:15px"><div class="avatar" id="profileAvatar" style="width:65px;height:65px;font-size:24px">N</div><div><h2 id="profileDisplayName" style="margin:0">Mon profil</h2><p class="sub" id="profileUsername"></p><span class="nova-chip" id="profileRole"></span></div></div><div class="toolbar" style="margin-top:20px"><input class="field" id="profileNameInput" maxlength="32" placeholder="Nom affiché"><input class="field" id="profileEmojiInput" maxlength="4" placeholder="Emoji avatar"><button class="primary" onclick="saveProfile()">Enregistrer</button></div><textarea class="field" id="profileBioInput" rows="3" maxlength="180" placeholder="Petite description…" style="width:100%"></textarea></div><div class="card"><h3>Mon activité</h3><div class="settings-row"><span>Tâches terminées</span><b id="profileTasks">0</b></div><div class="settings-row"><span>Projets créés</span><b id="profileProjects">0</b></div><div class="settings-row"><span>Notes enregistrées</span><b id="profileNotes">0</b></div><div class="settings-row"><span>Événements créés</span><b id="profileEvents">0</b></div><div class="settings-row"><span>Coins NOVA</span><b id="profileCoins">0</b></div></div></div>
+  </section>
+
+  <section class="page" id="settings">
+    <div class="page-head"><div><div class="eyebrow">PERSONNALISATION</div><h1>Paramètres</h1><p class="sub">Configure ton expérience NOVA.</p></div></div>
+    <div class="card">
+      <div class="settings-row"><div><b>Thème sombre</b><div class="sub">Conserver l'apparence sombre de NOVA</div></div><input type="checkbox" class="switch" id="darkToggle" checked></div>
+      <div class="settings-row"><div><b>Effets visuels</b><div class="sub">Activer les effets de transparence</div></div><input type="checkbox" class="switch" id="glassToggle" checked></div>
+      <div class="settings-row"><div><b>Sauvegarde cloud Firebase</b><div class="sub" id="firebaseStatus">À configurer — sauvegarde locale active</div></div><span class="tag orange" id="firebaseBadge">Hors ligne</span></div>
+      <div class="card" style="margin-top:14px;padding:18px;background:var(--panel2)">
+        <div class="eyebrow">NOVA CLOUD</div><h3 style="margin:5px 0 7px">Sauvegarde Firebase</h3>
+        <p class="sub">Colle uniquement l’URL de ta Realtime Database. Exemple : https://mon-projet-default-rtdb.europe-west1.firebasedatabase.app</p>
+        <label class="sub">URL de la base Firebase<input class="field" id="fbDatabaseUrl" placeholder="https://mon-projet-default-rtdb.firebaseio.com" autocomplete="url" style="width:100%"></label>
+        <div class="toolbar" style="margin-top:12px;flex-wrap:wrap"><button class="primary" onclick="saveFirebaseConfig()">Enregistrer l’URL</button><button class="ghost-btn" onclick="testFirebaseConnection()">Tester la connexion</button><button class="ghost-btn" onclick="syncFirebaseNow()">Sauvegarder maintenant</button><button class="ghost-btn" onclick="restoreFirebaseBackup()">Restaurer</button></div>
+        <p class="sub" id="firebaseHelp" style="margin-top:12px">Les données sont rangées séparément dans users/nom-du-compte. NOVA conserve aussi une copie locale sur cet appareil.</p>
+      </div>
+      <div class="card" style="margin-top:12px;padding:18px"><div class="section-title"><h3>Règles Realtime Database</h3><button class="ghost-btn" onclick="copyFirebaseRules()">Copier les règles</button></div><p class="sub">Ces règles autorisent la lecture et l’écriture sans connexion. C’est pratique pour un test, mais toute personne connaissant l’URL pourra lire, modifier ou supprimer les données. Ne stocke aucune information privée et ne laisse pas ces règles ainsi pour un usage réel.</p><pre id="firebaseRules" style="white-space:pre-wrap;overflow-wrap:anywhere;background:var(--panel2);padding:12px;border-radius:10px;font-size:11px;color:var(--text)">{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}</pre></div>
+      <div class="settings-row"><div><b>Exporter mes données</b><div class="sub">Télécharger tes données en JSON</div></div><button class="ghost-btn" onclick="exportData()">Exporter ↓</button></div>
+      <div class="settings-row"><div><b>Réinitialiser l'espace</b><div class="sub">Supprimer les données locales de ce dashboard</div></div><button class="ghost-btn" style="color:#ff9baf" onclick="resetData()">Réinitialiser</button></div>
+    </div>
+    <p class="sub" style="margin-top:15px">Sans URL Firebase, NOVA conserve les données sur cet appareil. La synchronisation Realtime Database utilise une URL publique et des règles ouvertes : elle ne fournit aucune authentification ni protection des comptes.</p>
+  </section>
+</main>
+</div>
+
+<div class="mobile-menu-panel" id="mobileMenu">
+  <div class="mobile-menu-head"><b>Explorer NOVA</b><button class="icon-btn" onclick="toggleMobileMenu(false)">×</button></div>
+  <div class="mobile-menu-section"><small>ORGANISATION</small><div class="mobile-menu-grid">
+    <button data-page="tasks">✓ Tâches</button><button data-page="projects">▦ Projets</button><button data-page="notes">✎ Notes</button><button data-page="calendar">▣ Calendrier</button><button data-page="files">▱ Fichiers</button>
+  </div></div>
+  <div class="mobile-menu-section"><small>ESPACE & OUTILS</small><div class="mobile-menu-grid">
+    <button data-page="analytics">⌁ Statistiques</button><button data-page="tools">⌘ Outils</button><button data-page="inventory">▣ Inventaire</button><button data-page="settings">⚙ Paramètres</button><button data-page="smart">◈ Vue intelligente</button><button data-page="agendaPlus">▦ Agenda+</button><button data-page="budget">€ Budget</button><button data-page="customize">◉ Personnalisation</button><button data-page="notifications">♧ Notifications</button><button data-page="profile">☺ Mon profil</button>
+  </div></div>
+  <div class="mobile-menu-section" id="mobilePremiumSection" style="display:none"><small>EXTENSIONS DÉBLOQUÉES</small><div class="mobile-menu-grid" id="mobilePremiumNav"></div></div>
+  <div class="mobile-menu-section" id="mobileAdminSection" style="display:none"><small>ADMINISTRATION</small><div class="mobile-menu-grid" id="mobileAdminNav"></div></div>
+</div>
+<nav class="mobile-nav" id="mobileNav">
+  <button class="active" data-page="home"><span>⌂</span>Accueil</button>
+  <button data-page="shop"><span>✧</span>Shop</button>
+  <button data-page="calendar"><span>▣</span>Agenda</button>
+  <button data-open-menu="1" onclick="toggleMobileMenu()"><span>☰</span>Explorer</button>
+</nav>
+
+
+<div class="auth-screen" id="authScreen">
+ <div class="auth-card">
+  <div class="brand" style="padding:0 0 18px"><div class="logo">N</div><div><strong>NOVA</strong><small>CONTROL CENTER</small></div></div>
+  <h1 id="authTitle">Connexion</h1><p id="authDescription">Connecte-toi pour retrouver ton espace NOVA.</p>
+  <input class="field" id="authUsername" autocomplete="username" placeholder="Nom d'utilisateur">
+  <input class="field" id="authPassword" type="password" autocomplete="current-password" placeholder="Mot de passe">
+  <div class="auth-actions"><button class="primary" id="authSubmit">Se connecter</button><button class="auth-switch" id="authToggle">Créer un compte</button></div>
+  <p id="authError" style="color:#ff9baf;min-height:16px"></p>
+  <p>Prototype local : les comptes et données sont enregistrés dans ce navigateur. Pour une vraie sécurité et une connexion entre appareils, il faut un serveur avec authentification.</p>
+ </div>
+</div>
+<div class="modal-back" id="modalBack" onclick="if(event.target===this)closeModal()"><div class="modal"><h2 id="modalTitle">Ajouter</h2><div id="modalFields"></div><div class="modal-actions"><button class="ghost-btn" onclick="closeModal()">Annuler</button><button class="primary" id="modalSave">Enregistrer</button></div></div></div>
+<script>
+const $=s=>document.querySelector(s);
+let currentUser=null,authMode='login';
+const accountKey='nova_accounts_v1';
+const SESSION_KEY='nova_active_session_v1';
+const lastPageKey=()=>currentUser?'nova_'+currentUser.username+'_last_page':'nova_guest_last_page';
+const accountList=()=>{try{return JSON.parse(localStorage.getItem(accountKey))||[]}catch{return []}};
+const storageKey=k=>'nova_'+(currentUser?currentUser.username+'_':'guest_')+k;
+const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(storageKey(k)))??d}catch{return d}};
+let cloudReady=false,cloudTimer=null,loadingCloud=false,cloudBaseUrl='';
+const FB_CONFIG_KEY='nova_realtime_database_url_v1';
+const CLOUD_KEYS=['tasks','notes','events','coins','unlocked','activity','memo','equipped','goals','habits','journalEntries','projects','wishlist','routines','routineChecks','dailyQuest','dailyStats','dailyReward','budgetEntries','novaNotifications','novaProfile','novaAccent','novaGlass','novaMotion'];
+const firebaseConfig=()=>{try{return localStorage.getItem(FB_CONFIG_KEY)||''}catch{return ''}};
+function updateCloudStatus(message,online=false){const s=$('#firebaseStatus'),b=$('#firebaseBadge');if(s)s.textContent=message;if(b){b.textContent=online?'Connecté':'Hors ligne';b.className='tag '+(online?'':'orange');}}
+function cloudUrl(){const username=(currentUser?.username||'guest').toLowerCase().replace(/[^a-z0-9_-]/g,'_');return cloudBaseUrl+'/users/'+encodeURIComponent(username)+'.json';}
+function cloudPayload(){const data={};CLOUD_KEYS.forEach(k=>{try{const raw=localStorage.getItem(storageKey(k));if(raw!==null)data[k]=JSON.parse(raw)}catch{}});data.profile=currentUser?.username||'guest';data.updatedAt=new Date().toISOString();return data;}
+async function cloudRequest(method='GET',payload=null){const response=await fetch(cloudUrl(),{method,headers:{'Content-Type':'application/json'},body:payload===null?undefined:JSON.stringify(payload)});if(!response.ok)throw new Error('HTTP '+response.status+' — vérifie les règles et l’URL Firebase.');return response.status===204?null:response.json();}
+function queueCloudSave(){if(!cloudReady||loadingCloud||!cloudBaseUrl||!currentUser)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(async()=>{try{await cloudRequest('PUT',cloudPayload());updateCloudStatus('Sauvegardé automatiquement · '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),true)}catch(err){updateCloudStatus('Erreur de sauvegarde : '+err.message)}},1000);}
+function fillFirebaseFields(){const el=$('#fbDatabaseUrl');if(el)el.value=firebaseConfig();}
+function normalizeDatabaseUrl(value){let url=value.trim().replace(/\/$/,'');if(!/^https:\/\//i.test(url))throw new Error('L’adresse doit commencer par https://');if(!/firebaseio\.com$|firebasedatabase\.app$/i.test(new URL(url).hostname))throw new Error('Cette adresse ne ressemble pas à une URL Realtime Database Firebase.');return url;}
+function saveFirebaseConfig(){try{const url=normalizeDatabaseUrl($('#fbDatabaseUrl').value);localStorage.setItem(FB_CONFIG_KEY,url);showToast('URL enregistrée. Connexion…');location.reload();}catch(e){showToast(e.message)}}
+async function initFirebase(){const url=firebaseConfig();if(!url){cloudReady=false;updateCloudStatus('À configurer — sauvegarde locale active');return;}try{cloudBaseUrl=normalizeDatabaseUrl(url);if(!currentUser){updateCloudStatus('URL enregistrée — connecte-toi à NOVA');return;}await syncFromCloudOnLogin();}catch(e){cloudReady=false;updateCloudStatus('Configuration invalide : '+e.message)}}
+async function syncFromCloudOnLogin(){try{const data=await cloudRequest('GET');if(data&&typeof data==='object'){loadingCloud=true;CLOUD_KEYS.forEach(k=>{if(data[k]!==undefined)localStorage.setItem(storageKey(k),JSON.stringify(data[k]));});loadingCloud=false;loadUserDataFromStorage();renderAll();updateCloudStatus('Données récupérées depuis Firebase',true);}else{await cloudRequest('PUT',cloudPayload());updateCloudStatus('Première sauvegarde créée dans Firebase',true);}cloudReady=true;}catch(e){loadingCloud=false;cloudReady=false;updateCloudStatus('Erreur Realtime Database : '+e.message)}}
+async function testFirebaseConnection(){try{const url=normalizeDatabaseUrl($('#fbDatabaseUrl').value||firebaseConfig());cloudBaseUrl=url;const response=await fetch(url+'/.json');if(!response.ok)throw new Error('HTTP '+response.status+' — vérifie les règles de lecture.');await response.json();showToast('Connexion à la base Firebase réussie ✓');updateCloudStatus('Base Firebase accessible',true);}catch(e){showToast('Test impossible : '+e.message);updateCloudStatus('Test échoué : '+e.message)}}
+function loadUserDataFromStorage(){tasks=load('tasks',[]);notes=load('notes',[]);events=load('events',[]);coins=load('coins',250);unlocked=load('unlocked',[]);activity=load('activity',[]);equipped=load('equipped',[]);goals=load('goals',[]);habits=load('habits',[]);journalEntries=load('journalEntries',[]);projects=load('projects',[]);wishlist=load('wishlist',[]);routines=load('routines',{morning:['Se préparer','Prendre son petit-déjeuner','Vérifier son planning'],evening:['Préparer ses affaires','Ranger son espace','Se détendre']});routineChecks=load('routineChecks',{});dailyQuest=load('dailyQuest',{date:'',claimed:[]});dailyStats=load('dailyStats',{date:todayKey(),tasks:0,notes:0,projects:0});}
+async function syncFirebaseNow(){if(!cloudBaseUrl){showToast('Enregistre d’abord l’URL Firebase.');return;}try{await cloudRequest('PUT',cloudPayload());cloudReady=true;updateCloudStatus('Sauvegarde envoyée à '+new Date().toLocaleTimeString('fr-FR'),true);showToast('Sauvegarde Firebase terminée ✓')}catch(e){updateCloudStatus('Erreur : '+e.message);showToast('Sauvegarde impossible : '+e.message)}}
+async function restoreFirebaseBackup(){if(!cloudBaseUrl){showToast('Enregistre d’abord l’URL Firebase.');return;}if(!confirm('Remplacer les données locales de ce compte par la sauvegarde Firebase ?'))return;try{const data=await cloudRequest('GET');if(!data){showToast('Aucune sauvegarde trouvée dans le cloud.');return;}loadingCloud=true;CLOUD_KEYS.forEach(k=>{if(data[k]!==undefined)localStorage.setItem(storageKey(k),JSON.stringify(data[k]));});loadingCloud=false;loadUserDataFromStorage();renderAll();cloudReady=true;updateCloudStatus('Sauvegarde cloud restaurée',true);showToast('Données restaurées ✓')}catch(e){loadingCloud=false;showToast('Restauration impossible : '+e.message)}}
+function copyFirebaseRules(){const txt=$('#firebaseRules').textContent;navigator.clipboard?.writeText(txt).then(()=>showToast('Règles copiées ✓')).catch(()=>showToast('Sélectionne les règles pour les copier.'));}
+const save=(k,v)=>{localStorage.setItem(storageKey(k),JSON.stringify(v));queueCloudSave();};
+let tasks=load('tasks',[]),notes=load('notes',[]),events=load('events',[]),coins=load('coins',250),unlocked=load('unlocked',[]),activity=load('activity',[]),equipped=load('equipped',[]);
+let monthCursor=new Date();let timerSeconds=0,timerInterval=null;let focusSeconds=1500,focusInterval=null,focusMode='work';let goals=load('goals',[]),habits=load('habits',[]),journalEntries=load('journalEntries',[]),projects=load('projects',[]);
+let wishlist=load('wishlist',[]),routines=load('routines',{morning:['Se préparer','Prendre son petit-déjeuner','Vérifier son planning'],evening:['Préparer ses affaires','Ranger son espace','Se détendre']}),routineChecks=load('routineChecks',{}),dailyQuest=load('dailyQuest',{date:'',claimed:[]}),dailyStats=load('dailyStats',{date:new Date().toISOString().slice(0,10),tasks:0,notes:0,projects:0});
+function todayKey(){return new Date().toISOString().slice(0,10)}
+function bumpDailyStat(key){const today=todayKey();if(dailyStats.date!==today)dailyStats={date:today,tasks:0,notes:0,projects:0};dailyStats[key]=(dailyStats[key]||0)+1;save('dailyStats',dailyStats)}
+const products=[
+ {id:'accent',icon:'✦',name:'Accent Aurora',desc:'Débloque une palette de couleurs alternative.',price:80},
+ {id:'focus',icon:'◉',name:'Mode Focus',desc:'Un espace visuel épuré pour tes sessions de travail.',price:120},
+ {id:'widgets',icon:'▦',name:'Widgets avancés',desc:'Ajoute des widgets supplémentaires à ta vue générale.',price:150},
+ {id:'themes',icon:'◈',name:'Thèmes exclusifs',desc:'Accède à des styles visuels supplémentaires.',price:180},
+ {id:'insights',icon:'⌁',name:'Insights+',desc:'Débloque des statistiques complémentaires.',price:220},
+ {id:'sound',icon:'♫',name:'Ambiance sonore',desc:'Une option d’ambiance pour tes sessions.',price:100},
+ {id:'goals_pass',icon:'🎯',name:'Centre des objectifs',desc:'Débloque un nouvel onglet pour créer et suivre tes objectifs.',price:220,tab:'goals',tabLabel:'Objectifs',tabIcon:'🎯'},
+ {id:'habits_pass',icon:'🔁',name:'Suivi des habitudes',desc:'Débloque un onglet pour suivre tes habitudes au quotidien.',price:260,tab:'habits',tabLabel:'Habitudes',tabIcon:'🔁'},
+ {id:'journal_pass',icon:'📓',name:'Journal personnel',desc:'Débloque ton espace privé pour écrire et retrouver tes entrées.',price:280,tab:'journal',tabLabel:'Journal',tabIcon:'📓'},
+ {id:'focus_pass',icon:'⚡',name:'Salle Focus',desc:'Débloque un minuteur de concentration avec pauses.',price:320,tab:'focusroom',tabLabel:'Focus+',tabIcon:'⚡'},
+ {id:'challenges_pass',icon:'🏁',name:'Défis quotidiens',desc:'Débloque des missions renouvelées chaque jour avec des récompenses en coins.',price:240,tab:'challenges',tabLabel:'Défis',tabIcon:'🏁'},
+ {id:'wishlist_pass',icon:'💎',name:'Liste de souhaits',desc:'Garde une liste des choses et projets que tu aimerais réaliser.',price:190,tab:'wishlist',tabLabel:'Wishlist',tabIcon:'💎'},
+ {id:'routines_pass',icon:'🌅',name:'Routines',desc:'Crée tes routines du matin et du soir et coche chaque étape.',price:230,tab:'routines',tabLabel:'Routines',tabIcon:'🌅'},
+ {id:'trophies_pass',icon:'🏆',name:'Galerie des trophées',desc:'Débloque des badges selon tes avancées dans NOVA.',price:210,tab:'trophies',tabLabel:'Trophées',tabIcon:'🏆'}
+];
+function logActivity(message){activity.unshift({message,time:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})});activity=activity.slice(0,5);save('activity',activity)}
+function showToast(msg){let t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.append(t);setTimeout(()=>t.remove(),2500)}
+function navigate(page){if(page==='admin'&&currentUser?.role!=='admin')return showToast('Accès réservé à l’administrateur.');const pass=products.find(p=>p.tab===page);if(pass&&!unlocked.includes(pass.id))return showToast('Cet onglet est verrouillé : débloque-le dans la boutique.');try{localStorage.setItem(lastPageKey(),page)}catch{}document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===page));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('#crumb').textContent=({home:'Accueil',tasks:'Tâches',projects:'Projets',notes:'Notes',calendar:'Calendrier',files:'Fichiers',analytics:'Statistiques',tools:'Outils',shop:'Boutique',settings:'Paramètres',inventory:'Inventaire',admin:'Administration',goals:'Objectifs',habits:'Habitudes',journal:'Journal',focusroom:'Focus+',challenges:'Défis du jour',wishlist:'Wishlist',routines:'Routines',trophies:'Trophées',smart:'Vue intelligente',agendaPlus:'Agenda+',budget:'Budget',customize:'Personnalisation',notifications:'Notifications',profile:'Mon profil'})[page];renderAll();toggleMobileMenu(false);window.scrollTo({top:0,behavior:'smooth'})}
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.page)));
+function openModal(type){let title,fields,saveFn;
+ if(type==='task'){title='Nouvelle tâche';fields='<input class="field" id="fTitle" placeholder="Nom de la tâche"><select class="field" id="fPriority"><option>Normale</option><option>Importante</option><option>Urgente</option></select>';saveFn=()=>{let v=$('#fTitle').value.trim();if(!v)return showToast('Ajoute un titre.');tasks.unshift({id:Date.now(),title:v,priority:$('#fPriority').value,done:false,rewarded:false});save('tasks',tasks);logActivity('Nouvelle tâche ajoutée');closeModal();renderAll();showToast('Tâche ajoutée ✓')}}
+ else if(type==='note'){title='Nouvelle note';fields='<input class="field" id="fTitle" placeholder="Titre"><textarea class="field" id="fBody" rows="5" placeholder="Écris ton idée…"></textarea>';saveFn=()=>{let v=$('#fTitle').value.trim(),body=$('#fBody').value.trim();if(!v&&!body)return;notes.unshift({id:Date.now(),title:v||'Note sans titre',body,date:new Date().toLocaleDateString('fr-FR')});save('notes',notes);bumpDailyStat('notes');logActivity('Nouvelle note créée');closeModal();renderAll();showToast('Note sauvegardée ✓')}}
+ else{title='Nouvel événement';fields='<input class="field" id="fTitle" placeholder="Nom de l’événement"><input class="field" id="fDate" type="date">';saveFn=()=>{let v=$('#fTitle').value.trim(),date=$('#fDate').value;if(!v||!date)return showToast('Complète le nom et la date.');events.push({id:Date.now(),title:v,date});events.sort((a,b)=>a.date.localeCompare(b.date));save('events',events);logActivity('Événement ajouté au calendrier');closeModal();renderAll();showToast('Événement ajouté ✓')}}
+ $('#modalTitle').textContent=title;$('#modalFields').innerHTML=fields;$('#modalSave').onclick=saveFn;$('#modalBack').classList.add('show')}
+function closeModal(){$('#modalBack').classList.remove('show')}
+function toggleTask(id){
+  let t=tasks.find(x=>x.id===id);if(!t)return;
+  t.done=!t.done;let reward=0;
+  if(t.done){bumpDailyStat('tasks')}
+  if(t.done&&!t.rewarded){coins+=20;t.rewarded=true;reward=20;save('coins',coins);logActivity('Tâche terminée · +20 coins');}
+  save('tasks',tasks);renderAll();
+  if(reward)showToast('Tâche terminée : +20 coins ✦');
+}
+function deleteTask(id){tasks=tasks.filter(x=>x.id!==id);save('tasks',tasks);renderAll()}
+function taskHTML(t){return `<div class="task ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${t.id})"><span class="task-text">${esc(t.title)}</span><span class="tag ${t.priority==='Urgente'?'orange':t.priority==='Importante'?'purple':''}">${esc(t.priority||'Normale')}</span><button class="icon-btn" style="width:30px;height:30px;padding:0" onclick="deleteTask(${t.id})">×</button></div>`}
+function renderTasks(){let list=tasks.filter(t=>t.title.toLowerCase().includes(($('#taskSearch')?.value||'').toLowerCase()));let f=$('#taskFilter')?.value||'all';if(f==='done')list=list.filter(t=>t.done);if(f==='todo')list=list.filter(t=>!t.done);$('#allTasks').innerHTML=list.length?list.map(taskHTML).join(''):'<div class="empty">Aucune tâche ici. Ajoute-en une pour commencer.</div>';let pending=tasks.filter(t=>!t.done);$('#homeTasks').innerHTML=pending.length?pending.slice(0,4).map(taskHTML).join(''):'<div class="empty">Tout est terminé. Bien joué ! ✨</div>'}
+function renderNotes(){let q=($('#noteSearch')?.value||'').toLowerCase(),list=notes.filter(n=>(n.title+n.body).toLowerCase().includes(q));$('#notesGrid').innerHTML=list.length?list.map(n=>`<article class="card note"><h3>${esc(n.title)}</h3><p>${esc(n.body)}</p><small>${n.date} <button class="ghost-btn" style="float:right;padding:5px 8px" onclick="deleteNote(${n.id})">Supprimer</button></small></article>`).join(''):'<div class="empty">Tes notes apparaîtront ici.</div>'}
+function deleteNote(id){notes=notes.filter(n=>n.id!==id);save('notes',notes);renderAll()}
+function renderCalendar(){let y=monthCursor.getFullYear(),m=monthCursor.getMonth(),first=new Date(y,m,1),last=new Date(y,m+1,0),start=(first.getDay()+6)%7;$('#monthTitle').textContent=first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});let days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];let out=days.map(d=>`<div style="text-align:center;color:var(--muted);font-size:10px;padding:7px">${d}</div>`).join('');for(let i=0;i<start;i++)out+=`<div class="day muted"></div>`;for(let d=1;d<=last.getDate();d++){let date=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,ev=events.filter(e=>e.date===date),today=new Date().toISOString().slice(0,10);out+=`<div class="day ${date===today?'today':''}"><b>${d}</b>${ev.length?`<small>${esc(ev[0].title)}${ev.length>1?' +'+(ev.length-1):''}</small>`:''}</div>`}$('#calendarGrid').innerHTML=out;$('#eventList').innerHTML=events.length?events.map(e=>`<div class="task"><span class="tag purple">${new Date(e.date+'T12:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})}</span><span class="task-text">${esc(e.title)}</span><button class="icon-btn" style="width:30px;height:30px;padding:0" onclick="deleteEvent(${e.id})">×</button></div>`).join(''):'<div class="empty">Aucun événement programmé.</div>'}
+function changeMonth(n){monthCursor.setMonth(monthCursor.getMonth()+n);renderCalendar()}
+function deleteEvent(id){events=events.filter(e=>e.id!==id);save('events',events);renderCalendar();renderStats()}
+function claimDailyReward(){
+ const today=new Date().toISOString().slice(0,10),claimed=load('dailyReward','');
+ if(claimed===today)return showToast('Récompense déjà récupérée aujourd’hui.');
+ coins+=30;save('coins',coins);save('dailyReward',today);logActivity('Récompense quotidienne · +30 coins');renderAll();showToast('+30 coins ajoutés ✦');
+}
+function renderInventory(){
+ const owned=products.filter(p=>unlocked.includes(p.id));
+ $('#equippedLabel').textContent=equipped.length?equipped.map(id=>products.find(p=>p.id===id)?.name).filter(Boolean).join(' · '):'Aucun objet équipé.';
+ $('#inventoryGrid').innerHTML=owned.length?owned.map(p=>`<div class="card inventory-item"><div class="product-icon">${p.icon}</div><b>${esc(p.name)}</b><p class="sub">${esc(p.desc)}</p><button class="buy equip" onclick="toggleEquip('${p.id}')">${equipped.includes(p.id)?'✓ Équipé · Retirer':'Équiper'}</button></div>`).join(''):'<div class="empty">Ton inventaire est vide. Achète un objet dans la boutique pour le retrouver ici.</div>';
+}
+function toggleEquip(id){equipped=equipped.includes(id)?equipped.filter(x=>x!==id):[...equipped,id];save('equipped',equipped);renderInventory();showToast('Inventaire mis à jour ✓');}
+function renderUnlockedTabs(){
+ const side=$('#premiumNav'),mobile=$('#mobilePremiumNav');
+ document.querySelectorAll('[data-premium-tab="1"]').forEach(b=>b.remove());
+ const owned=products.filter(p=>p.tab&&unlocked.includes(p.id));
+ $('#premiumGroup').style.display=owned.length?'':'none';$('#mobilePremiumSection').style.display=owned.length?'':'none';
+ owned.forEach(p=>{
+  if(side){const b=document.createElement('button');b.dataset.page=p.tab;b.dataset.premiumTab='1';b.innerHTML=`<span class="ico">${p.tabIcon}</span>${p.tabLabel}`;b.onclick=()=>navigate(p.tab);side.append(b);}
+  if(mobile){const b=document.createElement('button');b.dataset.page=p.tab;b.dataset.premiumTab='1';b.innerHTML=`${p.tabIcon} ${p.tabLabel}`;b.onclick=()=>navigate(p.tab);mobile.append(b);}
+ });
+}
+function addProject(){const input=$('#projectInput'),title=input.value.trim();if(!title)return showToast('Donne un nom à ton projet.');projects.unshift({id:Date.now(),title,progress:0,created:new Date().toISOString()});save('projects',projects);bumpDailyStat('projects');input.value='';renderProjects();logActivity('Nouveau projet créé');showToast('Projet créé ✓')}
+function updateProject(id,delta){const p=projects.find(x=>x.id===id);if(!p)return;p.progress=Math.max(0,Math.min(100,p.progress+delta));save('projects',projects);renderProjects()}
+function deleteProject(id){projects=projects.filter(x=>x.id!==id);save('projects',projects);renderProjects();showToast('Projet supprimé')}
+function renderProjects(){const el=$('#projectList');if(!el)return;el.innerHTML=projects.length?projects.map(p=>`<article class="card project-card"><div class="eyebrow">PROJET PERSONNEL</div><b>${esc(p.title)}</b><div class="progress"><i style="width:${p.progress}%"></i></div><div class="project-meta"><span>Progression</span><b>${p.progress}%</b></div><div class="project-actions"><button class="buy" onclick="updateProject(${p.id},10)">＋ 10%</button><button class="buy" onclick="updateProject(${p.id},-10)">− 10%</button><button class="ghost-btn" onclick="deleteProject(${p.id})">Supprimer</button></div></article>`).join(''):'<div class="empty" style="grid-column:1/-1">Aucun projet pour le moment. Crée ton premier projet ci-dessus !</div>'}
+function toggleMobileMenu(force){const panel=$('#mobileMenu');if(!panel)return;const open=typeof force==='boolean'?force:!panel.classList.contains('open');panel.classList.toggle('open',open);}
+function addGoal(){const input=$('#goalInput'),title=input.value.trim();if(!title)return showToast('Écris un objectif.');goals.push({id:Date.now(),title,progress:0});save('goals',goals);input.value='';renderGoals();showToast('Objectif ajouté ✓')}
+function updateGoal(id,delta){const g=goals.find(x=>x.id===id);if(!g)return;g.progress=Math.max(0,Math.min(100,g.progress+delta));save('goals',goals);renderGoals()}
+function deleteGoal(id){goals=goals.filter(x=>x.id!==id);save('goals',goals);renderGoals()}
+function renderGoals(){const el=$('#goalList');if(!el)return;el.innerHTML=goals.length?goals.map(g=>`<div class="card"><div class="section-title"><b>${esc(g.title)}</b><span>${g.progress}%</span></div><div class="progress"><i style="width:${g.progress}%"></i></div><div class="toolbar"><button class="buy" onclick="updateGoal(${g.id},10)">＋ 10%</button><button class="buy" onclick="updateGoal(${g.id},-10)">− 10%</button><button class="ghost-btn" onclick="deleteGoal(${g.id})">Supprimer</button></div></div>`).join(''):'<div class="empty">Aucun objectif pour le moment. Ajoute ton premier objectif !</div>'}
+function addHabit(){const input=$('#habitInput'),title=input.value.trim();if(!title)return showToast('Écris une habitude.');habits.push({id:Date.now(),title,days:[]});save('habits',habits);input.value='';renderHabits()}
+function toggleHabit(id){const h=habits.find(x=>x.id===id);if(!h)return;const today=new Date().toISOString().slice(0,10);h.days=h.days||[];h.days=h.days.includes(today)?h.days.filter(d=>d!==today):[...h.days,today];save('habits',habits);renderHabits()}
+function deleteHabit(id){habits=habits.filter(x=>x.id!==id);save('habits',habits);renderHabits()}
+function renderHabits(){const el=$('#habitList');if(!el)return;const today=new Date().toISOString().slice(0,10);el.innerHTML=habits.length?habits.map(h=>`<div class="feature-row"><span>${esc(h.title)}<small style="display:block">${(h.days||[]).length} jour(s) validé(s)</small></span><button class="buy" onclick="toggleHabit(${h.id})">${(h.days||[]).includes(today)?'✓ Fait aujourd’hui':'Valider'}</button><button class="ghost-btn" onclick="deleteHabit(${h.id})">×</button></div>`).join(''):'<div class="empty">Ajoute une habitude que tu veux suivre.</div>'}
+function renderJournal(){const date=new Date().toISOString().slice(0,10);$('#journalDate').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});const entry=journalEntries.find(x=>x.date===date);if(document.activeElement!==$('#journalInput'))$('#journalInput').value=entry?.text||'';$('#journalHistory').innerHTML=journalEntries.length?journalEntries.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<div class="feature-row"><span>${new Date(e.date+'T12:00:00').toLocaleDateString('fr-FR')}<small style="display:block">${esc(e.text.slice(0,100))}${e.text.length>100?'…':''}</small></span></div>`).join(''):'<div class="empty">Tes entrées enregistrées apparaîtront ici.</div>'}
+function saveJournalEntry(){const date=new Date().toISOString().slice(0,10),text=$('#journalInput').value.trim();if(!text)return showToast('Écris quelque chose avant d’enregistrer.');const old=journalEntries.find(x=>x.date===date);if(old)old.text=text;else journalEntries.push({date,text});save('journalEntries',journalEntries);renderJournal();showToast('Entrée enregistrée ✓')}
+function renderFocus(){const m=Math.floor(focusSeconds/60),sec=focusSeconds%60;$('#focusDisplay').textContent=String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');$('#focusStatus').textContent=focusMode==='work'?'Session de concentration':'Pause';}
+function setFocusMode(mode){clearInterval(focusInterval);focusInterval=null;focusMode=mode;focusSeconds=mode==='work'?1500:300;$('#focusStart').textContent='Démarrer';renderFocus()}
+function toggleFocus(){if(focusInterval){clearInterval(focusInterval);focusInterval=null;$('#focusStart').textContent='Reprendre';return;}$('#focusStart').textContent='Pause';focusInterval=setInterval(()=>{focusSeconds--;renderFocus();if(focusSeconds<=0){clearInterval(focusInterval);focusInterval=null;$('#focusStart').textContent='Démarrer';showToast(focusMode==='work'?'Session terminée ! Prends une pause.':'Pause terminée !');}},1000)}
+function resetFocus(){clearInterval(focusInterval);focusInterval=null;focusSeconds=focusMode==='work'?1500:300;$('#focusStart').textContent='Démarrer';renderFocus()}
+function renderShop(){$('#shopGrid').innerHTML=products.map(p=>{let own=unlocked.includes(p.id);return `<div class="card product"><div class="product-icon">${p.icon}</div><h3>${p.name}</h3><p>${p.desc}</p>${p.tab?'<span class="tag purple">Nouvel onglet</span>':''}<div class="product-bottom"><span class="price">✦ ${p.price}</span><button class="buy" ${own?'disabled':''} onclick="buyProduct('${p.id}')">${own?'✓ Débloqué':'Débloquer'}</button></div></div>`}).join('')}
+function buyProduct(id){let p=products.find(x=>x.id===id);if(!p||unlocked.includes(id))return;if(coins<p.price)return showToast('Pas assez de coins. Termine des tâches pour en gagner !');coins-=p.price;unlocked.push(id);save('coins',coins);save('unlocked',unlocked);logActivity('Option débloquée : '+p.name);renderUnlockedTabs();renderAll();showToast(p.tab?'Nouvel onglet '+p.tabLabel+' débloqué ! ✨':p.name+' débloqué ! ✨')}
+function renderStats(){let done=tasks.filter(t=>t.done).length,total=tasks.length,pct=total?Math.round(done/total*100):0;$('#statDone').textContent=done;$('#statTodo').textContent=total-done;$('#statNotes').textContent=notes.length;$('#statLevel').textContent=String(1+Math.floor(done/5)).padStart(2,'0');$('#progressLabel').textContent=pct+'% complété';$('#progressBar').style.width=pct+'%';$('#anaRate').textContent=pct+'%';$('#anaTotal').textContent=total;$('#anaNotes').textContent=notes.length;$('#anaEvents').textContent=events.length;$('#doneSegment').style.width=pct+'%';$('#todoSegment').style.width=(100-pct)+'%';$('#coinTop').textContent=coins;$('#coinShop').textContent=coins;$('#walletBalance').textContent=coins;$('#activity').innerHTML=activity.length?activity.map(a=>`<div class="activity-row"><div class="activity-dot"></div><p>${esc(a.message)}<small>Aujourd'hui · ${a.time}</small></p></div>`).join(''):'<div class="activity-row"><div class="activity-dot"></div><p>Bienvenue sur NOVA.<small>Ton espace est prêt à être personnalisé.</small></p></div>'}
+const questDefs=[{id:'tasks',icon:'✓',title:'Passer à l’action',desc:'Terminer au moins une tâche aujourd’hui.',reward:20,done:()=>dailyStats.date===todayKey()&&dailyStats.tasks>0},{id:'notes',icon:'✎',title:'Capturer une idée',desc:'Créer une note aujourd’hui.',reward:20,done:()=>dailyStats.date===todayKey()&&dailyStats.notes>0},{id:'projects',icon:'🚀',title:'Faire avancer un projet',desc:'Créer un projet aujourd’hui.',reward:20,done:()=>dailyStats.date===todayKey()&&dailyStats.projects>0}];
+function renderChallenges(){if(dailyQuest.date!==todayKey())dailyQuest={date:todayKey(),claimed:[]};save('dailyQuest',dailyQuest);const done=questDefs.filter(q=>q.done()).length;$('#challengeDate').textContent=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});$('#challengeDone').textContent=done+'/3';$('#challengeEarn').textContent=(questDefs.filter(q=>q.done()&&!dailyQuest.claimed.includes(q.id)).reduce((a,q)=>a+q.reward,0));$('#challengeList').innerHTML=questDefs.map(q=>{const complete=q.done(),claimed=dailyQuest.claimed.includes(q.id);return `<article class="card"><div class="product-icon">${q.icon}</div><b>${q.title}</b><p class="sub">${q.desc}</p><div class="section-title"><span class="tag ${complete?'purple':''}">${claimed?'Récompense récupérée':complete?'Mission terminée':'En attente'}</span><b class="price">✦ ${q.reward}</b></div><button class="buy" style="width:100%;margin-top:12px" ${!complete||claimed?'disabled':''} onclick="claimQuest('${q.id}')">${claimed?'✓ Récupérée':complete?'Récupérer la récompense':'À accomplir'}</button></article>`}).join('')}
+function claimQuest(id){const q=questDefs.find(x=>x.id===id);if(!q||!q.done()||dailyQuest.claimed.includes(id))return;dailyQuest.claimed.push(id);coins+=q.reward;save('dailyQuest',dailyQuest);save('coins',coins);logActivity('Défi terminé · +'+q.reward+' coins');renderAll();showToast('+'+q.reward+' coins gagnés ! ✦')}
+function addWish(){const input=$('#wishInput'),title=input.value.trim();if(!title)return showToast('Écris un élément à ajouter.');wishlist.unshift({id:Date.now(),title,category:$('#wishCategory').value,done:false});save('wishlist',wishlist);input.value='';renderWishlist();showToast('Ajouté à ta wishlist ✓')}
+function toggleWish(id){const w=wishlist.find(x=>x.id===id);if(!w)return;w.done=!w.done;save('wishlist',wishlist);renderWishlist()}
+function deleteWish(id){wishlist=wishlist.filter(x=>x.id!==id);save('wishlist',wishlist);renderWishlist()}
+function renderWishlist(){const el=$('#wishList');if(!el)return;el.innerHTML=wishlist.length?wishlist.map(w=>`<div class="feature-row"><input type="checkbox" ${w.done?'checked':''} onchange="toggleWish(${w.id})"><span style="${w.done?'text-decoration:line-through;opacity:.55':''}">${esc(w.title)}<small style="display:block">${esc(w.category)}</small></span><button class="ghost-btn" onclick="deleteWish(${w.id})">Supprimer</button></div>`).join(''):'<div class="empty">Ta liste est vide. Ajoute une idée, un projet ou une envie !</div>'}
+function addRoutine(type){const input=$('#'+type+'Input'),value=input.value.trim();if(!value)return; routines[type]=routines[type]||[];routines[type].push(value);save('routines',routines);input.value='';renderRoutines()}
+function toggleRoutine(type,index){const today=todayKey();if(routineChecks.date!==today)routineChecks={date:today,morning:[],evening:[]};routineChecks[type]=routineChecks[type]||[];routineChecks[type]=routineChecks[type].includes(index)?routineChecks[type].filter(x=>x!==index):[...routineChecks[type],index];save('routineChecks',routineChecks);renderRoutines()}
+function deleteRoutine(type,index){routines[type].splice(index,1);save('routines',routines);routineChecks[type]=(routineChecks[type]||[]).filter(x=>x!==index).map(x=>x>index?x-1:x);save('routineChecks',routineChecks);renderRoutines()}
+function renderRoutines(){const today=todayKey();if(routineChecks.date!==today)routineChecks={date:today,morning:[],evening:[]};['morning','evening'].forEach(type=>{const arr=routines[type]||[],checked=routineChecks[type]||[];$('#'+type+'Count').textContent=checked.length+'/'+arr.length;$('#'+type+'Routine').innerHTML=arr.length?arr.map((item,i)=>`<div class="feature-row"><input type="checkbox" ${checked.includes(i)?'checked':''} onchange="toggleRoutine('${type}',${i})"><span style="${checked.includes(i)?'text-decoration:line-through;opacity:.55':''}">${esc(item)}</span><button class="ghost-btn" onclick="deleteRoutine('${type}',${i})">×</button></div>`).join(''):'<div class="empty">Ajoute ta première étape.</div>'})}
+const trophyDefs=[{icon:'🌱',name:'Premier pas',desc:'Créer ta première tâche.',ok:()=>tasks.length>=1},{icon:'✅',name:'En mouvement',desc:'Terminer 5 tâches.',ok:()=>tasks.filter(t=>t.done).length>=5},{icon:'🏅',name:'Persévérant',desc:'Terminer 20 tâches.',ok:()=>tasks.filter(t=>t.done).length>=20},{icon:'📝',name:'Boîte à idées',desc:'Créer 5 notes.',ok:()=>notes.length>=5},{icon:'🚀',name:'Bâtisseur',desc:'Créer 3 projets.',ok:()=>projects.length>=3},{icon:'💰',name:'Portefeuille actif',desc:'Atteindre 500 coins.',ok:()=>coins>=500},{icon:'🗓️',name:'Organisé',desc:'Ajouter 5 événements.',ok:()=>events.length>=5},{icon:'✨',name:'Explorateur',desc:'Débloquer 3 extensions.',ok:()=>unlocked.length>=3}];
+function renderTrophies(){const won=trophyDefs.filter(t=>t.ok());$('#trophyCount').textContent=won.length+'/'+trophyDefs.length;const next=trophyDefs.find(t=>!t.ok());$('#nextTrophy').textContent=next?next.icon:'MAX';$('#trophyGrid').innerHTML=trophyDefs.map(t=>{const ok=t.ok();return `<article class="card" style="opacity:${ok?1:.55}"><div class="product-icon">${ok?t.icon:'🔒'}</div><b>${t.name}</b><p class="sub">${t.desc}</p><span class="tag ${ok?'purple':''}">${ok?'Débloqué':'Verrouillé'}</span></article>`}).join('')}
+// --- NOVA 2.0 : six modules additionnels ---
+let budgetEntries=load('budgetEntries',[]),novaNotifications=load('novaNotifications',[]),novaProfile=load('novaProfile',{});
+const accentChoices=[['#9b8cff','#63d9c5'],['#56a8ff','#63d9c5'],['#f38fc5','#f5c978'],['#63d9c5','#9b8cff'],['#ff9b70','#f5c978'],['#d1a5ff','#ff8fbd']];
+{const a=accentChoices[Number(load('novaAccent',0))]||accentChoices[0];document.documentElement.style.setProperty('--accent',a[0]);document.documentElement.style.setProperty('--accent2',a[1]);}
+function setAccent(index){const c=accentChoices[index]||accentChoices[0];document.documentElement.style.setProperty('--accent',c[0]);document.documentElement.style.setProperty('--accent2',c[1]);save('novaAccent',index);renderCustomize()}
+function renderCustomize(){const el=$('#accentSwatches');if(!el)return;const chosen=Number(load('novaAccent',0));el.innerHTML=accentChoices.map((c,i)=>`<button class="swatch ${i===chosen?'selected':''}" style="background:linear-gradient(135deg,${c[0]},${c[1]})" title="Palette ${i+1}" onclick="setAccent(${i})"></button>`).join('');$('#customGlass').checked=load('novaGlass',true);$('#motionToggle').checked=load('novaMotion',true)}
+function setGlass(on){save('novaGlass',on);document.querySelectorAll('.card,.sidebar,.mobile-nav').forEach(e=>e.style.backdropFilter=on?'blur(18px)':'none')}
+function setMotion(on){save('novaMotion',on);document.body.classList.toggle('no-motion',!on)}
+function resetAppearance(){setAccent(0);setGlass(true);setMotion(true);setTheme(true);showToast('Apparence réinitialisée ✓')}
+function renderSmart(){const done=tasks.filter(t=>t.done).length,todo=tasks.filter(t=>!t.done),pct=tasks.length?Math.round(done/tasks.length*100):0,now=new Date(),limit=new Date(now);limit.setDate(limit.getDate()+7);const upcoming=events.filter(e=>{const d=new Date(e.date+'T00:00:00');return d>=new Date(now.toDateString())&&d<=limit}).length;$('#smartDone').textContent=done;$('#smartTodo').textContent=todo.length;$('#smartEvents').textContent=upcoming;$('#smartProjects').textContent=projects.length;$('#smartPercent').textContent=pct+'%';$('#smartBar').style.width=pct+'%';$('#smartAdvice').textContent=todo.length?`Tu as ${todo.length} tâche(s) à terminer. Commence par une petite étape.`:'Tout est à jour côté tâches. Tu peux avancer un projet ou préparer la suite.';const priority=todo.slice().sort((a,b)=>({Urgente:0,Importante:1,Normale:2}[a.priority]??2)-({Urgente:0,Importante:1,Normale:2}[b.priority]??2)).slice(0,3);$('#smartPriority').innerHTML=priority.length?priority.map(t=>`<div class="nova-row"><span>◷</span><div class="grow">${esc(t.title)}<small>${esc(t.priority||'Normale')}</small></div></div>`).join(''):'<div class="empty">Aucune priorité en attente 🎉</div>';const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=d.toISOString().slice(0,10);const count=events.filter(e=>e.date===key).length+tasks.filter(t=>t.done&&t.completedAt?.slice(0,10)===key).length;days.push({label:d.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit'}),count})}$('#smartWeek').innerHTML=days.map(d=>`<div class="nova-row"><span class="grow">${d.label}</span><b>${d.count}</b><span class="nova-chip">activité</span></div>`).join('')}
+function renderAgendaPlus(){const from=$('#agendaFrom')?.value||todayKey(),filter=$('#agendaFilter')?.value||'all';const rows=[];if(filter!=='tasks')events.filter(e=>e.date>=from).forEach(e=>rows.push({date:e.date,type:'Événement',title:e.title,icon:'▦'}));if(filter!=='events')tasks.filter(t=>!t.done).forEach(t=>rows.push({date:t.dueDate||from,type:'Tâche',title:t.title,icon:'✓'}));rows.sort((a,b)=>a.date.localeCompare(b.date));$('#agendaCount').textContent=rows.length+' élément(s)';$('#agendaList').innerHTML=rows.length?rows.map(r=>`<div class="nova-row"><span>${r.icon}</span><div class="grow">${esc(r.title)}<small>${r.type} · ${new Date(r.date+'T00:00:00').toLocaleDateString('fr-FR')}</small></div><span class="nova-chip">${r.date<todayKey()?'À vérifier':r.date===todayKey()?'Aujourd’hui':'À venir'}</span></div>`).join(''):'<div class="empty">Rien à afficher pour le moment.</div>'}
+function addBudgetEntry(){const label=$('#budgetLabel').value.trim(),amount=Number($('#budgetAmount').value),type=$('#budgetType').value;if(!label||!Number.isFinite(amount)||amount<=0)return showToast('Indique un nom et un montant valide.');budgetEntries.unshift({id:Date.now(),label,amount:Math.round(amount*100)/100,type,date:todayKey()});save('budgetEntries',budgetEntries);$('#budgetLabel').value='';$('#budgetAmount').value='';renderBudget();showToast('Opération ajoutée ✓')}
+function deleteBudgetEntry(id){budgetEntries=budgetEntries.filter(x=>x.id!==id);save('budgetEntries',budgetEntries);renderBudget()}
+function clearBudget(){if(!confirm('Effacer tout l’historique du budget ?'))return;budgetEntries=[];save('budgetEntries',budgetEntries);renderBudget()}
+function renderBudget(){const income=budgetEntries.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0),expense=budgetEntries.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0);$('#budgetBalance').textContent=(income-expense).toFixed(2)+' €';$('#budgetIncome').textContent=income.toFixed(2)+' €';$('#budgetExpense').textContent=expense.toFixed(2)+' €';$('#budgetCount').textContent=budgetEntries.length;$('#budgetList').innerHTML=budgetEntries.length?budgetEntries.map(x=>`<div class="nova-row"><span>${x.type==='income'?'↗':'↘'}</span><div class="grow">${esc(x.label)}<small>${new Date(x.date+'T00:00:00').toLocaleDateString('fr-FR')}</small></div><b style="color:${x.type==='income'?'var(--accent2)':'#f38f9b'}">${x.type==='income'?'+':'−'}${x.amount.toFixed(2)} €</b><button class="ghost-btn" onclick="deleteBudgetEntry(${x.id})">×</button></div>`).join(''):'<div class="empty">Aucune opération enregistrée.</div>'}
+function addNotification(){const input=$('#notificationInput'),message=input.value.trim();if(!message)return showToast('Écris un rappel.');novaNotifications.unshift({id:Date.now(),message,date:new Date().toISOString(),read:false});save('novaNotifications',novaNotifications);input.value='';renderNotifications();showToast('Rappel ajouté ✓')}
+function readNotification(id){const n=novaNotifications.find(x=>x.id===id);if(n)n.read=true;save('novaNotifications',novaNotifications);renderNotifications()}
+function deleteNotification(id){novaNotifications=novaNotifications.filter(x=>x.id!==id);save('novaNotifications',novaNotifications);renderNotifications()}
+function markAllNotificationsRead(){novaNotifications.forEach(n=>n.read=true);save('novaNotifications',novaNotifications);renderNotifications()}
+function renderNotifications(){const unread=novaNotifications.filter(n=>!n.read).length;$('#notificationUnread').textContent=unread+' non lue(s)';$('#notificationList').innerHTML=novaNotifications.length?novaNotifications.map(n=>`<div class="nova-row" style="opacity:${n.read?.65:1}"><span>${n.read?'✓':'●'}</span><div class="grow">${esc(n.message)}<small>${new Date(n.date).toLocaleString('fr-FR')}</small></div>${n.read?'':'<button class="ghost-btn" onclick="readNotification('+n.id+')">Lu</button>'}<button class="ghost-btn" onclick="deleteNotification(${n.id})">×</button></div>`).join(''):'<div class="empty">Aucune notification. Tu peux créer tes propres rappels.</div>'}
+function saveProfile(){novaProfile={name:$('#profileNameInput').value.trim().slice(0,32),emoji:$('#profileEmojiInput').value.trim().slice(0,4),bio:$('#profileBioInput').value.trim().slice(0,180)};save('novaProfile',novaProfile);renderProfile();showToast('Profil enregistré ✓')}
+function renderProfile(){const name=novaProfile.name||currentUser?.username||'Mon profil',emoji=novaProfile.emoji||currentUser?.username?.slice(0,1).toUpperCase()||'N';$('#profileAvatar').textContent=emoji;$('#profileDisplayName').textContent=name;$('#profileUsername').textContent='@'+(currentUser?.username||'');$('#profileRole').textContent=currentUser?.role==='admin'?'Administrateur':'Membre NOVA';$('#profileNameInput').value=novaProfile.name||'';$('#profileEmojiInput').value=novaProfile.emoji||'';$('#profileBioInput').value=novaProfile.bio||'';$('#profileTasks').textContent=tasks.filter(t=>t.done).length;$('#profileProjects').textContent=projects.length;$('#profileNotes').textContent=notes.length;$('#profileEvents').textContent=events.length;$('#profileCoins').textContent=coins;const avatar=document.querySelector('.profile .avatar');if(avatar)avatar.textContent=emoji;const label=document.querySelector('.profile b');if(label)label.textContent=name}
+function renderNova20(){renderSmart();renderAgendaPlus();renderBudget();renderCustomize();renderNotifications();renderProfile()}
+function renderAll(){renderTasks();renderProjects();renderNotes();renderCalendar();renderShop();renderInventory();renderStats();renderGoals();renderHabits();if($('#journalInput'))renderJournal();if($('#focusDisplay'))renderFocus();if(currentUser?.role==='admin')renderAdmin();renderChallenges();renderWishlist();renderRoutines();renderTrophies();renderNova20();}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('#taskSearch').addEventListener('input',renderTasks);$('#taskFilter').addEventListener('change',renderTasks);$('#noteSearch').addEventListener('input',renderNotes);
+$('#fileInput').addEventListener('change',e=>{$('#fileList').innerHTML=[...e.target.files].map(f=>`<div class="task"><span>▱</span><span class="task-text">${esc(f.name)}</span><span class="tag">${(f.size/1024).toFixed(1)} Ko</span></div>`).join('')||'<div class="empty">Aucun fichier sélectionné.</div>'});
+function calculate(){let expr=$('#calcInput').value.trim();if(!/^[0-9+\-*/().%\s]+$/.test(expr))return $('#calcResult').textContent='Expression invalide';try{let result=Function('"use strict";return ('+expr+')')();$('#calcResult').textContent=Number.isFinite(result)?result:'Erreur'}catch{$('#calcResult').textContent='Erreur'}}
+function formatTime(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+$('#timerStart').onclick=()=>{if(timerInterval){clearInterval(timerInterval);timerInterval=null;$('#timerStart').textContent='Reprendre'}else{timerInterval=setInterval(()=>{$('#timerDisplay').textContent=formatTime(++timerSeconds)},1000);$('#timerStart').textContent='Pause'}};
+$('#timerReset').onclick=()=>{clearInterval(timerInterval);timerInterval=null;timerSeconds=0;$('#timerDisplay').textContent='00:00';$('#timerStart').textContent='Démarrer'};
+$('#quickMemo').value=load('memo','');$('#quickMemo').addEventListener('input',e=>save('memo',e.target.value));fillFirebaseFields();
+function exportData(){let data={tasks,notes,events,coins,unlocked,projects,goals,habits,journalEntries,wishlist,routines,routineChecks,dailyQuest,dailyStats,exportedAt:new Date().toISOString()};let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='nova-backup.json';a.click();URL.revokeObjectURL(a.href);showToast('Export téléchargé ✓')}
+function resetData(){if(!confirm('Supprimer toutes les données NOVA enregistrées sur cet appareil ?'))return;['tasks','notes','events','coins','unlocked','activity','memo'].forEach(k=>localStorage.removeItem('nova_'+k));tasks=[];notes=[];events=[];coins=250;unlocked=[];activity=[];renderAll();showToast('Espace réinitialisé')}
+function setTheme(dark){
+  document.body.classList.toggle('light',!dark);$('#darkToggle').checked=dark;
+  localStorage.setItem('nova_theme',dark?'dark':'light');$('#themeBtn').textContent=dark?'☼':'☾';
+}
+$('#themeBtn').onclick=()=>{setTheme(document.body.classList.contains('light'));showToast(document.body.classList.contains('light')?'Thème clair activé':'Thème sombre activé')};
+$('#darkToggle').onchange=e=>setTheme(e.target.checked);
+$('#glassToggle').onchange=e=>{document.querySelectorAll('.card,.sidebar,.mobile-nav').forEach(el=>el.style.backdropFilter=e.target.checked?'blur(18px)':'none')};
+setTheme(localStorage.getItem('nova_theme')!=='light');
+
+function setAuthMode(mode){
+ authMode=mode;$('#authTitle').textContent=mode==='login'?'Connexion':'Créer un compte';
+ $('#authDescription').textContent=mode==='login'?'Connecte-toi pour retrouver ton espace NOVA.':'Choisis un identifiant et un mot de passe pour créer ton espace.';
+ $('#authSubmit').textContent=mode==='login'?'Se connecter':'Créer mon compte';
+ $('#authToggle').textContent=mode==='login'?'Créer un compte':'J’ai déjà un compte';
+ $('#authPassword').autocomplete=mode==='login'?'current-password':'new-password';$('#authError').textContent='';
+}
+$('#authToggle').onclick=()=>setAuthMode(authMode==='login'?'register':'login');
+async function passwordHash(value){
+ const bytes=new TextEncoder().encode(value),digest=await crypto.subtle.digest('SHA-256',bytes);
+ return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function loadUserData(restorePage=false){
+ loadUserDataFromStorage();
+ renderUnlockedTabs();
+ $('#appShell').style.display='';$('#authScreen').style.display='none';
+ const profile=document.querySelector('.profile');
+ if(profile)profile.innerHTML=`<div class="avatar">${esc(currentUser.username.slice(0,1).toUpperCase())}</div><div><b>${esc(currentUser.username)}</b><small>${currentUser.role==='admin'?'Administrateur':'Utilisateur'}</small></div>`;
+ if(currentUser.role==='admin'){
+  $('#adminGroup').style.display='';$('#mobileAdminSection').style.display='';
+  if(!$('#adminNav [data-page="admin"]')){const b=document.createElement('button');b.dataset.page='admin';b.innerHTML='<span class="ico">♛</span>Administration';b.onclick=()=>navigate('admin');$('#adminNav').append(b);}
+  if(!$('#mobileAdminNav [data-page="admin"]')){const mb=document.createElement('button');mb.dataset.page='admin';mb.textContent='♛ Administration';mb.onclick=()=>navigate('admin');$('#mobileAdminNav').append(mb);}
+ }else{$('#adminGroup').style.display='none';$('#mobileAdminSection').style.display='none';}
+ renderAll();let target='home';if(restorePage){try{target=localStorage.getItem(lastPageKey())||'home'}catch{}}navigate(target);
+}
+$('#authSubmit').onclick=async()=>{
+ const username=$('#authUsername').value.trim(),password=$('#authPassword').value;
+ if(!/^[a-zA-Z0-9_-]{3,20}$/.test(username)||password.length<6){$('#authError').textContent='Identifiant : 3 à 20 caractères (lettres/chiffres). Mot de passe : 6 caractères minimum.';return;}
+ let accounts=accountList(),existing=accounts.find(a=>a.username.toLowerCase()===username.toLowerCase());
+ if(authMode==='register'){
+  if(existing){$('#authError').textContent='Ce nom d’utilisateur existe déjà.';return;}
+  if(username.toLowerCase()==='admin'){$('#authError').textContent='Ce nom est réservé.';return;}
+  accounts.push({username,hash:await passwordHash(password),role:'user',createdAt:new Date().toISOString()});
+  localStorage.setItem(accountKey,JSON.stringify(accounts));existing=accounts[accounts.length-1];
+ }else{
+  if(!existing||existing.hash!==await passwordHash(password)){$('#authError').textContent='Identifiant ou mot de passe incorrect.';return;}
+ }
+ currentUser={username:existing.username,role:existing.role};localStorage.setItem(SESSION_KEY,currentUser.username);loadUserData(false);initFirebase();
+};
+function logout(){localStorage.removeItem(SESSION_KEY);currentUser=null;[tasks,notes,events,activity,unlocked,equipped]=[[],[],[],[],[],[]];coins=250;$('#appShell').style.display='none';$('#authScreen').style.display='grid';$('#authPassword').value='';$('#authUsername').value='';setAuthMode('login');}
+function renderAdmin(){
+ if(currentUser?.role!=='admin')return;
+ const accounts=accountList();$('#adminUser').innerHTML=accounts.map(a=>`<option value="${esc(a.username)}">${esc(a.username)}${a.username===currentUser.username?' (mon compte)':''} · ${a.role==='admin'?'Admin':'Utilisateur'}</option>`).join('');
+ $('#adminUsers').innerHTML=accounts.map(a=>`<div class="task"><span class="task-text">${esc(a.username)}</span><span class="tag ${a.role==='admin'?'orange':'purple'}">${a.role==='admin'?'Admin':'Utilisateur'}</span></div>`).join('');
+}
+function adminGrantCoins(){
+ if(currentUser?.role!=='admin')return;
+ const target=$('#adminUser').value,amount=Math.floor(Number($('#adminCoins').value));
+ if(!target||!Number.isFinite(amount)||amount<1||amount>100000)return showToast('Montant ou compte invalide.');
+ const key='nova_'+target+'_coins',balance=(()=>{try{return JSON.parse(localStorage.getItem(key))??250}catch{return 250}})();
+ localStorage.setItem(key,JSON.stringify(balance+amount));
+ if(target===currentUser.username){coins=balance+amount;renderAll();}
+ $('#adminCoins').value='';
+ showToast(amount+' coins ajoutés à '+(target===currentUser.username?'ton compte':target)+' ✓');
+}
+(async()=>{
+ // Création initiale du compte admin sur cet appareil. Le mot de passe n'est jamais enregistré en clair.
+ const accounts=accountList();
+ if(!accounts.some(a=>a.username==='admin')){
+  const initialHash=await passwordHash('31O311Ms$');
+  accounts.push({username:'admin',hash:initialHash,role:'admin',createdAt:new Date().toISOString()});
+  localStorage.setItem(accountKey,JSON.stringify(accounts));
+ }
+ // Restaure la session locale et le dernier onglet après un rechargement.
+ const activeName=localStorage.getItem(SESSION_KEY);
+ if(activeName){
+  const saved=accountList().find(a=>a.username.toLowerCase()===activeName.toLowerCase());
+  if(saved){currentUser={username:saved.username,role:saved.role};loadUserData(true);initFirebase();}
+  else localStorage.removeItem(SESSION_KEY);
+ }
+})();
+
+// Session persistante locale : pratique sur un appareil personnel, mais pas une authentification sécurisée.
+</script>
+</body>
+</html>
